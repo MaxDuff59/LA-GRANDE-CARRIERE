@@ -18,6 +18,15 @@ export function pickPondere(items) {
 }
 
 /**
+ * Tire une issue dont le poids est une fonction de l'état (actions de match).
+ * Le plancher évite qu'un attribut très élevé rende une issue strictement
+ * impossible : il reste toujours un fond d'aléa.
+ */
+export function pickPondereDyn(items, s) {
+  return pickPondere(items.map((x) => ({ ...x, poids: Math.max(0.5, x.poids(s)) })));
+}
+
+/**
  * Générateur pseudo-aléatoire déterministe (LCG).
  * Sert au Défi du jour : même graine = même profil pour tout le monde.
  */

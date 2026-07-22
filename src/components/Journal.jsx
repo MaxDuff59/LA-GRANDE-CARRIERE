@@ -9,6 +9,7 @@ const COULEURS = {
   transfert: C.accent2,
   stat: C.txt2,
   conseq: C.txt,
+  action: C.ambre,
   event: C.txt,
   info: C.txt,
 };

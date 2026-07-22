@@ -3,13 +3,14 @@ import { POSTES } from "../data/postes.js";
 import { NATIONS, ORIGINES, HYGIENES, AGENTS } from "../data/profil.js";
 import { CLUBS } from "../data/clubs.js";
 import { EVENTS } from "../data/events.js";
+import { ACTIONS } from "../data/actions.js";
 import { MAX_PERKS_EQUIPES, PERKS } from "../data/perks.js";
 import { creerCarriere, rehydrater, normaliser, noteGlobale } from "./joueur.js";
 import { progression } from "./progression.js";
 import { simulerSaison } from "./saison.js";
 import { marche, signer as signerOffre, verifierFin } from "./marche.js";
 import { calculerScore, rang, jetonsGagnes } from "./score.js";
-import { pickPondere, seedRandom, seedDuJour, chance } from "./utils.js";
+import { pickPondere, pickPondereDyn, seedRandom, seedDuJour, chance } from "./utils.js";
 
 /**
  * Hook central. Expose l'état du jeu et les actions du joueur.
@@ -19,9 +20,16 @@ export function useJeu() {
   const [ecran, setEcran] = useState("accueil");
   const [s, setS] = useState(null);
   const [journal, setJournal] = useState([]);
-  const [evenement, setEvenement] = useState(null);
   const [offres, setOffres] = useState(null);
   const [defiEnCours, setDefiEnCours] = useState(false);
+
+  /**
+   * File des interactions en attente de réponse : d'abord les actions de
+   * match, puis l'événement narratif de fin de saison. Un seul slot ne
+   * suffisait plus, il peut y avoir jusqu'à trois cartes à enchaîner.
+   */
+  const [file, setFile] = useState([]);
+  const evenement = file[0] ?? null;
 
   // Méta-progression
   const [jetons, setJetons] = useState(6);
@@ -52,7 +60,7 @@ export function useJeu() {
       const etat = creerCarriere(setup, defi ? [] : equipes);
       setS(etat);
       setDefiEnCours(defi);
-      setEvenement(null);
+      setFile([]);
       setOffres(null);
       setJournal([
         { type: "titre", txt: `Saison ${etat.saison} — ${etat.age} ans — ${etat.club.nom} (${etat.club.div})` },
@@ -75,9 +83,31 @@ export function useJeu() {
     return pickPondere(dispo);
   }, []);
 
+  /**
+   * Tire 1 à 2 actions de match pour la saison écoulée.
+   * Contrairement aux événements, aucun flag n'est posé : elles sont
+   * répétables d'une saison à l'autre — mais jamais deux fois la même
+   * dans la même saison.
+   */
+  const tirerActions = useCallback((etat) => {
+    if (etat.tempsJeu < 25) return [];
+
+    const dispo = ACTIONS.filter((a) => !a.cond || a.cond(etat));
+    if (!dispo.length) return [];
+
+    const tirees = [];
+    const n = chance(0.35) ? 2 : 1;
+    for (let k = 0; k < n && dispo.length; k++) {
+      const a = pickPondere(dispo);
+      tirees.push(a);
+      dispo.splice(dispo.indexOf(a), 1);
+    }
+    return tirees;
+  }, []);
+
   /** Joue une saison entière. */
   const jouerSaison = useCallback(() => {
-    if (!s || s.fini || evenement || offres) return;
+    if (!s || s.fini || file.length || offres) return;
 
     const etat = rehydrater(s);
     const lignes = [
@@ -94,11 +124,12 @@ export function useJeu() {
     });
     res.log.forEach((txt) => lignes.push({ type: "event", txt }));
 
+    // Tirés avant le vieillissement : les `cond` d'âge et les conséquences
+    // (usure, moral) doivent porter sur la saison qui vient d'être jouée.
+    const actions = tirerActions(etat);
     const ev = tirerEvenement(etat);
-    if (ev) {
-      etat.flags[`ev_${ev.id}`] = true;
-      setEvenement(ev);
-    }
+    if (ev) etat.flags[`ev_${ev.id}`] = true;
+    setFile([...actions, ...(ev ? [ev] : [])]);
 
     etat.age += 1;
     etat.saison += 1;
@@ -112,13 +143,23 @@ export function useJeu() {
 
     setS(etat);
     ajouterLignes(lignes);
-  }, [s, evenement, offres, tirerEvenement, ajouterLignes]);
+  }, [s, file, offres, tirerActions, tirerEvenement, ajouterLignes]);
 
-  /** Applique le choix du joueur sur un événement. */
+  /** Applique le choix du joueur sur une action de match ou un événement. */
   const repondreEvenement = useCallback(
     (choix) => {
       const etat = rehydrater(s);
-      const consequence = choix.effet(etat);
+
+      // Une action de match n'a pas d'effet écrit d'avance : on tire une
+      // issue parmi celles du choix, pondérée par les attributs.
+      let consequence;
+      if (choix.issues) {
+        const issue = pickPondereDyn(choix.issues, etat);
+        issue.effet(etat);
+        consequence = issue.txt;
+      } else {
+        consequence = choix.effet(etat);
+      }
 
       // Le perk/événement "japon" force un changement de club
       if (etat.flags.forceClubJapon && !etat.flags.japonApplique) {
@@ -129,13 +170,14 @@ export function useJeu() {
 
       normaliser(etat);
       setS(etat);
+      const action = evenement?.kind === "action";
       ajouterLignes([
         { type: "choix", txt: `▸ ${choix.label}` },
-        { type: "conseq", txt: consequence },
+        { type: action ? "action" : "conseq", txt: consequence },
       ]);
-      setEvenement(null);
+      setFile((f) => f.slice(1));
     },
-    [s, ajouterLignes]
+    [s, evenement, ajouterLignes]
   );
 
   /** Signe une offre de contrat. */
@@ -184,7 +226,7 @@ export function useJeu() {
     etat.finRaison = "Retraite anticipée. Décision personnelle, assumée.";
     setS(etat);
     setOffres(null);
-    setEvenement(null);
+    setFile([]);
     ajouterLignes([{ type: "fin", txt: etat.finRaison }]);
   }, [s, ajouterLignes]);
 
