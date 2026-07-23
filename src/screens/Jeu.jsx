@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { C, S, couleurJauge } from "../styles/theme.js";
 import { Bouton } from "../components/Bouton.jsx";
 import { Jauge, LigneAttribut } from "../components/Jauge.jsx";
@@ -21,6 +21,27 @@ export function Jeu({
   onTerminer,
   onRetraite,
 }) {
+  // « Continuer » est actif sur le bilan, un tournoi, ou une carte dont
+  // l'issue a déjà été tirée — mais jamais quand des choix sont proposés
+  // ou sur l'écran d'offres.
+  const continuerActif = Boolean(
+    s && evenement && (evenement.kind === "recap" || evenement.kind === "intl" || resultat)
+  );
+
+  // Sur ordinateur, Entrée équivaut à cliquer sur « Continuer ». On laisse le
+  // clic natif agir si un bouton a déjà le focus (évite un double déclenchement).
+  useEffect(() => {
+    if (!continuerActif) return;
+    const onKey = (e) => {
+      if (e.key !== "Enter") return;
+      if (document.activeElement?.tagName === "BUTTON") return;
+      e.preventDefault();
+      onContinuer();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [continuerActif, onContinuer]);
+
   if (!s) return null;
 
   const bloque = Boolean(evenement || offres);

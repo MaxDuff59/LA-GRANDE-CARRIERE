@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { POSTES } from "../data/postes.js";
 import { NATIONS, ORIGINES, HYGIENES, AGENTS } from "../data/profil.js";
 import { clubsDeDepart } from "../data/clubs.js";
+import { nomAleatoire } from "../data/noms.js";
 import { C, S, optionStyle } from "../styles/theme.js";
 import { Bouton } from "../components/Bouton.jsx";
 
@@ -75,7 +76,9 @@ export function Creation({ onValider, onRetour }) {
 
   const etape = ETAPES[index];
   const estDerniere = index === ETAPES.length - 1;
-  const valide = etape.type === "texte" ? true : Boolean(setup[etape.cle]);
+  // À l'étape du nom, on exige un nom non vide ; sinon, une option choisie.
+  const valide =
+    etape.type === "texte" ? Boolean(setup.nom.trim()) : Boolean(setup[etape.cle]);
 
   const suivant = () => {
     if (estDerniere) onValider(setup);
@@ -87,6 +90,20 @@ export function Creation({ onValider, onRetour }) {
     else onRetour();
   };
 
+  // Sur ordinateur, Entrée valide l'étape (le bouton orange), y compris depuis
+  // le champ « nom ». On laisse le clic natif agir si un bouton a le focus.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== "Enter" || !valide) return;
+      if (document.activeElement?.tagName === "BUTTON") return;
+      e.preventDefault();
+      if (estDerniere) onValider(setup);
+      else setIndex((i) => i + 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [valide, estDerniere, setup, onValider]);
+
   return (
     <div style={S.app}>
       <div style={S.wrap}>
@@ -97,13 +114,43 @@ export function Creation({ onValider, onRetour }) {
         {etape.sous && <p style={{ ...S.sub, marginTop: 4, marginBottom: 18 }}>{etape.sous}</p>}
 
         {etape.type === "texte" ? (
-          <input
-            value={setup.nom}
-            onChange={(e) => setSetup({ ...setup, nom: e.target.value })}
-            placeholder="Nom du joueur"
-            maxLength={22}
-            style={S.input}
-          />
+          <div style={{ position: "relative", marginBottom: 14 }}>
+            <input
+              value={setup.nom}
+              onChange={(e) => setSetup({ ...setup, nom: e.target.value })}
+              placeholder="Nom du joueur"
+              maxLength={22}
+              autoFocus
+              style={{ ...S.input, marginBottom: 0, paddingRight: 52 }}
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                setSetup({ ...setup, nom: nomAleatoire() });
+                e.currentTarget.blur(); // Entrée enchaîne alors sur « Continuer »
+              }}
+              aria-label="Nom au hasard"
+              title="Nom au hasard"
+              style={{
+                position: "absolute",
+                right: 7,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: 38,
+                height: 38,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 9,
+                border: `1px solid ${C.bord}`,
+                background: C.panneauHaut,
+                cursor: "pointer",
+                fontSize: 18,
+                lineHeight: 1,
+              }}
+            >
+              🎲
+            </button>
+          </div>
         ) : etape.type === "club" ? (
           <div style={{ marginBottom: 14 }}>
             {clubs.map((c, i) => (
