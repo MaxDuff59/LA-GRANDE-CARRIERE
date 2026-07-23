@@ -124,14 +124,16 @@ function calculerTempsJeu(s) {
   // Avant 30 ans, le statut ne fait que grimper d'une saison à l'autre : jamais
   // il ne stagne ni ne recule. Il monte vite quand le niveau le mérite (la
   // cible tire vers le haut), sinon au minimum de quelques points. Seule
-  // exception, la saison d'arrivée dans un nouveau club (ancienneteClub remis à
-  // 0 par la signature), où se faire une place peut coûter jusqu'à ~8 % avant
-  // de repartir vers le haut dès la saison suivante.
+  // exception, la saison d'arrivée après un TRANSFERT (ancienneteClub remis à 0
+  // par la signature), où se faire une place peut coûter jusqu'à ~8 % avant de
+  // repartir vers le haut. La toute première saison de carrière n'est pas un
+  // transfert : elle ne baisse jamais sous la valeur de départ.
   if (s.age < 30) {
-    tj =
-      s.ancienneteClub === 0
-        ? Math.max(tj, actuel - BAISSE_MAX_TRANSFERT)
-        : Math.max(tj, actuel + rint(2, 5));
+    const debutCarriere = s.carriere.saisons.length === 0;
+    const arriveeTransfert = s.ancienneteClub === 0 && !debutCarriere;
+    tj = arriveeTransfert
+      ? Math.max(tj, actuel - BAISSE_MAX_TRANSFERT)
+      : Math.max(tj, actuel + rint(2, 5));
   }
 
   return Math.round(clamp(tj, 4, 96));
