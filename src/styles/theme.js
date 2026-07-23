@@ -112,6 +112,17 @@ export const optionStyle = (selectionnee) => ({
   transition: "border-color .12s, background .12s",
 });
 
+/**
+ * Rend une carte de décision saillante sans calque : fond légèrement teinté,
+ * bordure et halo colorés. Elle ressort du reste de la page tout en restant
+ * dans le flux, sous les autres éléments.
+ */
+export const carteSaillante = (teinte) => ({
+  borderColor: teinte,
+  background: `linear-gradient(0deg, ${teinte}14, ${teinte}14), ${C.panneau}`,
+  boxShadow: `inset 0 1px 0 ${teinte}33, 0 16px 40px -16px ${teinte}99, 0 10px 30px -14px rgba(0,0,0,0.55)`,
+});
+
 /** Couleur d'une jauge selon son niveau (usure inversée). */
 export const couleurJauge = (valeur, inverse = false) => {
   const v = inverse ? 100 - valeur : valeur;

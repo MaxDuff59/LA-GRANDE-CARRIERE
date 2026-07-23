@@ -1,10 +1,10 @@
 import React from "react";
-import { C, S, optionStyle } from "../styles/theme.js";
+import { C, S, optionStyle, carteSaillante } from "../styles/theme.js";
 
 /** Liste des offres de contrat en fin de bail. */
 export function CarteOffres({ offres, onSigner }) {
   return (
-    <div style={{ ...S.card, borderColor: C.accent2, marginBottom: 0, padding: 22 }}>
+    <div style={{ ...S.card, ...carteSaillante(C.accent2), marginBottom: 0, padding: 22 }}>
       <div style={{ ...S.label, color: C.accent2, marginBottom: 6 }}>
         Fin de contrat
       </div>

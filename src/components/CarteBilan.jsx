@@ -1,5 +1,5 @@
 import React from "react";
-import { C, S } from "../styles/theme.js";
+import { C, S, carteSaillante } from "../styles/theme.js";
 import { Bouton } from "./Bouton.jsx";
 
 /** Formate un montant en k€ vers « 0,8 M€ » ou « 640 k€ ». */
@@ -56,7 +56,7 @@ function Ligne({ icone, children }) {
 export function CarteBilan({ bilan, onContinuer }) {
   const b = bilan;
   return (
-    <div style={{ ...S.card, borderColor: C.accent2, marginBottom: 0, padding: 20 }}>
+    <div style={{ ...S.card, ...carteSaillante(C.accent2), marginBottom: 0, padding: 20 }}>
       <div
         style={{
           ...S.label,

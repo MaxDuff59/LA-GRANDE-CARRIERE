@@ -26,16 +26,10 @@ input:focus-visible,
   border-radius: 4px;
 }
 
-@keyframes voile {
+@keyframes carteEnter {
   from {
     opacity: 0;
-  }
-}
-
-@keyframes monte {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.985);
+    transform: translateY(18px) scale(0.985);
   }
 }
 

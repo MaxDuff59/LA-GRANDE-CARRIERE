@@ -1,5 +1,5 @@
 import React from "react";
-import { C, S } from "../styles/theme.js";
+import { C, S, carteSaillante } from "../styles/theme.js";
 import { Bouton } from "./Bouton.jsx";
 
 /** Petites pastilles montrant l'impact chiffré du choix sur les jauges/stats. */
@@ -47,7 +47,7 @@ export function CarteEvenement({ evenement, etat, resultat, onChoix, onContinuer
   const teinte = conf ? conf.teinte : C.or;
 
   return (
-    <div style={{ ...S.card, borderColor: teinte, marginBottom: 0, padding: 22 }}>
+    <div style={{ ...S.card, ...carteSaillante(teinte), marginBottom: 0, padding: 22 }}>
       {conf && (
         <div
           style={{

@@ -6,7 +6,6 @@ import { Journal } from "../components/Journal.jsx";
 import { CarteEvenement } from "../components/CarteEvenement.jsx";
 import { CarteBilan } from "../components/CarteBilan.jsx";
 import { CarteOffres } from "../components/CarteOffres.jsx";
-import { Modal } from "../components/Modal.jsx";
 
 export function Jeu({
   s,
@@ -22,6 +21,8 @@ export function Jeu({
   onRetraite,
 }) {
   if (!s) return null;
+
+  const bloque = Boolean(evenement || offres);
 
   return (
     <div style={S.app}>
@@ -80,41 +81,46 @@ export function Jeu({
 
         <Journal lignes={journal} />
 
-        {s.fini ? (
-          <Bouton onClick={onTerminer}>Voir le bilan de carrière</Bouton>
-        ) : (
-          <>
-            <Bouton onClick={onJouerSaison}>Jouer la saison {s.saison}</Bouton>
-            <Bouton variante="secondaire" onClick={onRetraite}>
-              Prendre ma retraite maintenant
-            </Bouton>
-          </>
+        {/* Carte de décision active : dans le flux, sous les autres éléments,
+            mise en valeur par sa teinte (voir carteSaillante). La clé relance
+            l'animation d'entrée quand une carte succède à une autre. */}
+        {evenement && (
+          <div
+            key={evenement.id}
+            style={{ animation: "carteEnter .42s cubic-bezier(.2, .7, .3, 1)" }}
+          >
+            {evenement.kind === "recap" ? (
+              <CarteBilan bilan={evenement.bilan} onContinuer={onContinuer} />
+            ) : (
+              <CarteEvenement
+                evenement={evenement}
+                etat={s}
+                resultat={resultat}
+                onChoix={onChoixEvenement}
+                onContinuer={onContinuer}
+              />
+            )}
+          </div>
         )}
-      </div>
 
-      {/* Décisions bloquantes : superposées, dans l'ordre où elles arrivent. */}
-      {evenement && (
-        // La clé relance l'animation quand une carte succède à une autre.
-        <Modal key={evenement.id}>
-          {evenement.kind === "recap" ? (
-            <CarteBilan bilan={evenement.bilan} onContinuer={onContinuer} />
+        {!evenement && offres && (
+          <div key="offres" style={{ animation: "carteEnter .42s cubic-bezier(.2, .7, .3, 1)" }}>
+            <CarteOffres offres={offres} onSigner={onSigner} />
+          </div>
+        )}
+
+        {!bloque &&
+          (s.fini ? (
+            <Bouton onClick={onTerminer}>Voir le bilan de carrière</Bouton>
           ) : (
-            <CarteEvenement
-              evenement={evenement}
-              etat={s}
-              resultat={resultat}
-              onChoix={onChoixEvenement}
-              onContinuer={onContinuer}
-            />
-          )}
-        </Modal>
-      )}
-
-      {!evenement && offres && (
-        <Modal>
-          <CarteOffres offres={offres} onSigner={onSigner} />
-        </Modal>
-      )}
+            <>
+              <Bouton onClick={onJouerSaison}>Jouer la saison {s.saison}</Bouton>
+              <Bouton variante="secondaire" onClick={onRetraite}>
+                Prendre ma retraite maintenant
+              </Bouton>
+            </>
+          ))}
+      </div>
     </div>
   );
 }
