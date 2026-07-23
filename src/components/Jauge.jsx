@@ -21,7 +21,7 @@ export function Jauge({ label, valeur, max = 100, couleur = C.accent, suffixe = 
       <div style={{ fontSize: 10, color: C.txt2, textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 4 }}>
         {label}
       </div>
-      <div style={{ height: 4, background: "#232A32", borderRadius: 2, overflow: "hidden", marginTop: 6 }}>
+      <div style={{ height: 4, background: C.track, borderRadius: 2, overflow: "hidden", marginTop: 6 }}>
         <div style={{ width: `${pct}%`, height: "100%", background: couleur, borderRadius: 2 }} />
       </div>
     </div>
@@ -37,7 +37,7 @@ export function LigneAttribut({ nom, valeur, max = 100 }) {
         <span style={{ color: C.txt2, textTransform: "capitalize" }}>{nom}</span>
         <span style={{ fontWeight: 700 }}>{Math.round(valeur)}</span>
       </div>
-      <div style={{ height: 4, background: "#232A32", borderRadius: 2, overflow: "hidden", marginTop: 6 }}>
+      <div style={{ height: 4, background: C.track, borderRadius: 2, overflow: "hidden", marginTop: 6 }}>
         <div style={{ width: `${pct}%`, height: "100%", background: C.accent2, borderRadius: 2 }} />
       </div>
     </div>

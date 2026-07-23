@@ -1,20 +1,33 @@
-/** Palette et styles partagés. Change les couleurs ici, partout à la fois. */
+/**
+ * Palette et styles partagés.
+ *
+ * Les couleurs ne sont pas des valeurs en dur : ce sont des références vers des
+ * variables CSS définies dans `global.css` (thème sombre par défaut, thème clair
+ * sous `:root[data-theme="light"]`). Basculer l'attribut `data-theme` sur
+ * `<html>` change toute l'interface d'un coup, sans re-render React.
+ * Voir `useTheme.js`.
+ */
 
 export const C = {
-  fond: "#101418",
-  panneau: "#171C22",
-  panneauHaut: "#1E2831",
-  bord: "#242B33",
-  txt: "#E4E7EA",
-  txt2: "#8A939E",
-  accent: "#C2410C",
-  accent2: "#0F7B6C",
-  or: "#E8C547",
-  rouge: "#B4342A",
-  ambre: "#D4A03C",
-  nuit: "#8B7BC4", // événements « hygiène de vie » (hors du terrain)
-  azur: "#4C87C9", // sélection nationale / compétitions internationales
+  fond: "var(--fond)",
+  panneau: "var(--panneau)",
+  panneauHaut: "var(--panneau-haut)",
+  bord: "var(--bord)",
+  track: "var(--track)",
+  txt: "var(--txt)",
+  txt2: "var(--txt2)",
+  accent: "var(--accent)",
+  accent2: "var(--accent2)",
+  or: "var(--or)",
+  rouge: "var(--rouge)",
+  ambre: "var(--ambre)",
+  nuit: "var(--nuit)", // événements « hygiène de vie » (hors du terrain)
+  azur: "var(--azur)", // sélection nationale / compétitions internationales
 };
+
+/** Mélange une teinte avec un fond (ou la transparence) — tints theme-aware. */
+export const teinte = (couleur, pct, base = "transparent") =>
+  `color-mix(in srgb, ${couleur} ${pct}%, ${base})`;
 
 export const S = {
   app: {
@@ -23,6 +36,7 @@ export const S = {
     color: C.txt,
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
     padding: "20px 16px",
+    transition: "background .25s ease, color .25s ease",
   },
   wrap: { maxWidth: 780, margin: "0 auto" },
 
@@ -52,34 +66,39 @@ export const S = {
   card: {
     background: C.panneau,
     border: `1px solid ${C.bord}`,
-    borderRadius: 10,
+    borderRadius: 14,
     padding: 16,
     marginBottom: 10,
+    boxShadow: "var(--ombre-carte)",
+    transition: "background .25s ease, border-color .25s ease",
   },
 
   btn: {
     background: C.accent,
     color: "#fff",
     border: "none",
-    borderRadius: 8,
+    borderRadius: 11,
     padding: "13px 22px",
     fontSize: 15,
     fontWeight: 700,
     cursor: "pointer",
     width: "100%",
     fontFamily: "inherit",
+    boxShadow: "0 6px 16px -8px color-mix(in srgb, var(--accent) 70%, transparent)",
+    transition: "transform .12s ease, box-shadow .18s ease, filter .18s ease",
   },
   btnSecondaire: {
     background: "transparent",
     color: C.txt2,
     border: `1px solid ${C.bord}`,
-    borderRadius: 8,
+    borderRadius: 11,
     padding: "11px 18px",
     fontSize: 14,
     cursor: "pointer",
     width: "100%",
     marginTop: 8,
     fontFamily: "inherit",
+    transition: "background .15s ease, border-color .15s ease, color .15s ease",
   },
 
   grid: {
@@ -92,13 +111,14 @@ export const S = {
     width: "100%",
     background: C.panneau,
     border: `1px solid ${C.bord}`,
-    borderRadius: 8,
+    borderRadius: 11,
     padding: 14,
     color: C.txt,
     fontSize: 16,
     marginBottom: 14,
     boxSizing: "border-box",
     fontFamily: "inherit",
+    transition: "border-color .15s ease",
   },
 };
 
@@ -106,11 +126,14 @@ export const S = {
 export const optionStyle = (selectionnee) => ({
   background: selectionnee ? C.panneauHaut : C.panneau,
   border: `1px solid ${selectionnee ? C.accent : C.bord}`,
-  borderRadius: 8,
+  borderRadius: 11,
   padding: "12px 14px",
   marginBottom: 8,
   cursor: "pointer",
-  transition: "border-color .12s, background .12s",
+  transition: "border-color .12s, background .12s, box-shadow .12s",
+  boxShadow: selectionnee
+    ? `0 0 0 1px ${teinte(C.accent, 40)}, 0 8px 20px -14px ${teinte(C.accent, 90)}`
+    : "none",
 });
 
 /**
@@ -118,10 +141,13 @@ export const optionStyle = (selectionnee) => ({
  * bordure et halo colorés. Elle ressort du reste de la page tout en restant
  * dans le flux, sous les autres éléments.
  */
-export const carteSaillante = (teinte) => ({
-  borderColor: teinte,
-  background: `linear-gradient(0deg, ${teinte}14, ${teinte}14), ${C.panneau}`,
-  boxShadow: `inset 0 1px 0 ${teinte}33, 0 16px 40px -16px ${teinte}99, 0 10px 30px -14px rgba(0,0,0,0.55)`,
+export const carteSaillante = (couleur) => ({
+  borderColor: couleur,
+  background: teinte(couleur, 9, C.panneau),
+  boxShadow: `inset 0 1px 0 ${teinte(couleur, 32)}, 0 18px 44px -18px ${teinte(
+    couleur,
+    60
+  )}, 0 10px 30px -14px var(--ombre)`,
 });
 
 /** Couleur d'une jauge selon son niveau (usure inversée). */

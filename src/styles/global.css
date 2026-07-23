@@ -1,17 +1,70 @@
+/* ==========================================================================
+   Thèmes. Le thème sombre est la valeur par défaut (:root) ; le thème clair
+   surcharge les mêmes variables sous [data-theme="light"]. Tous les composants
+   lisent ces variables via l'objet `C` de theme.js — voir useTheme.js pour la
+   bascule.
+   ========================================================================== */
+
+:root {
+  --fond: #0e1116;
+  --panneau: #161b22;
+  --panneau-haut: #1e2733;
+  --bord: #262d38;
+  --track: #232a32;
+  --txt: #e6e9ed;
+  --txt2: #8b95a1;
+
+  /* Couleurs de marque — identiques dans les deux thèmes */
+  --accent: #c2410c;
+  --accent2: #0f7b6c;
+  --rouge: #b4342a;
+  --nuit: #8b7bc4;
+
+  /* Accents ajustés pour rester lisibles selon le fond */
+  --or: #e8c547;
+  --ambre: #d4a03c;
+  --azur: #4c87c9;
+
+  --ombre: rgba(0, 0, 0, 0.55);
+  --ombre-carte: 0 1px 2px rgba(0, 0, 0, 0.28);
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --fond: #f4f5f7;
+  --panneau: #ffffff;
+  --panneau-haut: #eef1f4;
+  --bord: #e1e4ea;
+  --track: #e6e9ee;
+  --txt: #171c22;
+  --txt2: #616b78;
+
+  --or: #b0850f;
+  --ambre: #b57f1e;
+  --azur: #2e6db6;
+
+  --ombre: rgba(24, 34, 52, 0.16);
+  --ombre-carte: 0 1px 3px rgba(24, 34, 52, 0.07), 0 1px 2px rgba(24, 34, 52, 0.05);
+
+  color-scheme: light;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: #101418;
+  background: var(--fond);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease;
 }
 
 button:focus-visible,
 input:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid #C2410C;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -22,7 +75,7 @@ input:focus-visible,
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #242B33;
+  background: var(--bord);
   border-radius: 4px;
 }
 

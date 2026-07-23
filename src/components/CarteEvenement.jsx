@@ -1,5 +1,5 @@
 import React from "react";
-import { C, S, carteSaillante } from "../styles/theme.js";
+import { C, S, carteSaillante, teinte } from "../styles/theme.js";
 import { Bouton } from "./Bouton.jsx";
 
 /** Petites pastilles montrant l'impact chiffré du choix sur les jauges/stats. */
@@ -18,7 +18,7 @@ function Effets({ effets }) {
               padding: "4px 9px",
               borderRadius: 6,
               color: positif ? C.accent2 : C.rouge,
-              background: positif ? "rgba(15,123,108,0.13)" : "rgba(180,52,42,0.13)",
+              background: teinte(positif ? C.accent2 : C.rouge, 13),
             }}
           >
             {e.label} {e.delta > 0 ? "+" : ""}

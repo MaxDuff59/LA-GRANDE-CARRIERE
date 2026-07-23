@@ -97,9 +97,19 @@ const BLESSURES = [
 function calculerTempsJeu(s) {
   const attendu = s.club.prestige * 0.72 + 18;
   const ecart = s.note - attendu;
-  let tj = 45 + ecart * 3.4 + (s.relationCoach - 50) * 0.4 + rint(-10, 10);
-  if (s.suspension > 0) tj -= s.suspension * 2.2;
-  if (s.age >= 33) tj *= 0.88;
+  let cible = 45 + ecart * 3.4 + (s.relationCoach - 50) * 0.4;
+  if (s.suspension > 0) cible -= s.suspension * 2.2;
+  if (s.age >= 33) cible *= 0.88;
+  cible = clamp(cible, 4, 96);
+
+  // Le temps de jeu ne se recalcule pas de zéro : il glisse depuis sa valeur
+  // actuelle vers la cible. Une place se gagne et se perd progressivement, ce
+  // qui évite les chutes brutales « sans raison » d'une saison à l'autre. La
+  // montée est un peu plus rapide que la descente pour qu'un joueur en forme
+  // s'installe sans attendre des années.
+  const actuel = s.tempsJeu ?? cible;
+  const vitesse = cible > actuel ? 0.55 : 0.35;
+  const tj = actuel + (cible - actuel) * vitesse + rint(-4, 4);
   return Math.round(clamp(tj, 4, 96));
 }
 

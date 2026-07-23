@@ -1,5 +1,5 @@
 import React from "react";
-import { C, S, carteSaillante } from "../styles/theme.js";
+import { C, S, carteSaillante, teinte } from "../styles/theme.js";
 import { Bouton } from "./Bouton.jsx";
 import { SELECTIONS } from "../data/international.js";
 
@@ -87,7 +87,7 @@ function Classement({ standings, nation }) {
               alignItems: "center",
               padding: "7px 8px",
               borderRadius: 7,
-              background: moi ? `${C.azur}22` : "transparent",
+              background: moi ? teinte(C.azur, 13) : "transparent",
               color: moi ? C.txt : C.txt2,
               fontWeight: moi ? 700 : 400,
             }}

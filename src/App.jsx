@@ -5,6 +5,7 @@ import { Creation } from "./screens/Creation.jsx";
 import { Jeu } from "./screens/Jeu.jsx";
 import { Bilan } from "./screens/Bilan.jsx";
 import { Boutique } from "./screens/Boutique.jsx";
+import { ThemeToggle } from "./components/ThemeToggle.jsx";
 
 /**
  * Racine de l'application. Se contente d'aiguiller vers le bon écran :
@@ -13,6 +14,16 @@ import { Boutique } from "./screens/Boutique.jsx";
 export default function App() {
   const jeu = useJeu();
 
+  return (
+    <>
+      <ThemeToggle />
+      <Ecran jeu={jeu} />
+    </>
+  );
+}
+
+/** Aiguille vers l'écran courant. */
+function Ecran({ jeu }) {
   switch (jeu.ecran) {
     case "creation":
       return (

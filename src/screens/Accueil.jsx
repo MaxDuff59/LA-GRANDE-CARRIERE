@@ -2,19 +2,29 @@ import React from "react";
 import { C, S } from "../styles/theme.js";
 import { Bouton } from "../components/Bouton.jsx";
 
-export function Accueil({ onCommencer, onDefi, onBoutique, jetons, equipes, histo }) {
+export function Accueil({
+  onCommencer,
+  onDefi,
+  onBoutique,
+  jetons,
+  equipes,
+  histo,
+}) {
   return (
     <div style={S.app}>
       <div style={S.wrap}>
         <div style={{ padding: "44px 0 32px" }}>
-          <div style={{ ...S.label, color: C.accent }}>Jeu de carrière · Rugby</div>
+          <div style={{ ...S.label, color: C.accent }}>
+            Jeu de carrière · Rugby
+          </div>
           <h1 style={S.h1}>
-            DESTINY <span style={{ color: C.accent }}>XV</span>
+            LA GRANDE <span style={{ color: C.accent }}>CARRIÈRE</span>
           </h1>
           <p style={S.sub}>
-            De 18 à 37 ans, écris une carrière de rugbyman professionnel, saison après saison.
-            Le poste que tu choisis décide de ton corps. Les choix que tu fais décident du reste.
-            Personne ne connaît sa fin de carrière à l'avance.
+            De 18 à 37 ans, écris une carrière de rugbyman professionnel, saison
+            après saison. Le poste que tu choisis décide de ton corps. Les choix
+            que tu fais décident du reste. Personne ne connaît sa fin de
+            carrière à l'avance.
           </p>
         </div>
 
@@ -51,7 +61,9 @@ export function Accueil({ onCommencer, onDefi, onBoutique, jetons, equipes, hist
                     {h.rang} — {h.date}
                   </div>
                 </div>
-                <div style={{ fontWeight: 800, color: C.or, flexShrink: 0 }}>{h.score}</div>
+                <div style={{ fontWeight: 800, color: C.or, flexShrink: 0 }}>
+                  {h.score}
+                </div>
               </div>
             ))}
           </div>
