@@ -4,6 +4,7 @@ import { Bouton } from "../components/Bouton.jsx";
 import { Jauge, LigneAttribut } from "../components/Jauge.jsx";
 import { Journal } from "../components/Journal.jsx";
 import { CarteEvenement } from "../components/CarteEvenement.jsx";
+import { CarteBilan } from "../components/CarteBilan.jsx";
 import { CarteOffres } from "../components/CarteOffres.jsx";
 import { Modal } from "../components/Modal.jsx";
 
@@ -95,13 +96,17 @@ export function Jeu({
       {evenement && (
         // La clé relance l'animation quand une carte succède à une autre.
         <Modal key={evenement.id}>
-          <CarteEvenement
-            evenement={evenement}
-            etat={s}
-            resultat={resultat}
-            onChoix={onChoixEvenement}
-            onContinuer={onContinuer}
-          />
+          {evenement.kind === "recap" ? (
+            <CarteBilan bilan={evenement.bilan} onContinuer={onContinuer} />
+          ) : (
+            <CarteEvenement
+              evenement={evenement}
+              etat={s}
+              resultat={resultat}
+              onChoix={onChoixEvenement}
+              onContinuer={onContinuer}
+            />
+          )}
         </Modal>
       )}
 

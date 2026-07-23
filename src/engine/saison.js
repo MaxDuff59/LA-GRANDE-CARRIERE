@@ -1,5 +1,84 @@
 import { COMPETS, MATCHS_PAR_DIV } from "../data/clubs.js";
+import { noteGlobale } from "./joueur.js";
 import { rnd, rint, clamp, pick, chance } from "./utils.js";
+
+/** Taille approximative des championnats, pour situer le classement. */
+const TAILLE_DIV = {
+  "Top 14": 14, "Pro D2": 16, "URC": 16,
+  "Premiership": 10, "Super Rugby": 12, "League One": 12,
+};
+
+/** Faits marquants de la saison, pure ambiance affichée dans le récap. */
+const FAITS_MARQUANTS = [
+  "Un pilier inscrit un triplé et affole les réseaux tout un week-end.",
+  "Un match interrompu vingt minutes par une invasion de mouettes.",
+  "Un arbitre prend un carton jaune symbolique des joueurs, pour rire.",
+  "Un espoir de 17 ans marque pour ses débuts et fait la une des journaux.",
+  "Une finale décidée par un drop de 55 mètres à la dernière seconde.",
+  "Deux clubs jouent sous la neige : essai en glissade de 40 mètres.",
+  "Un talonneur tape la transformation de la gagne, buteurs tous sortis.",
+  "Une bagarre générale vide les deux bancs avant même le coup d'envoi.",
+];
+
+/** Manchette de presse, selon la réussite collective et personnelle. */
+function manchette(s, atteint, perso) {
+  if (atteint && perso) return `« ${s.nom} porte son club vers le haut. »`;
+  if (atteint) return `« ${s.nom} en retrait, mais le collectif répond présent. »`;
+  if (perso) return `« ${s.nom} surnage dans une équipe à la dérive. »`;
+  return `« Que se passe-t-il avec ${s.nom} ? Une saison à oublier. »`;
+}
+
+/**
+ * Construit le récapitulatif de fin de saison affiché au joueur : classement,
+ * objectif du club, verdict du staff, revenus et fait marquant.
+ */
+function bilanSaison(s, matchs, essais, points, titreGagne) {
+  const equipes = TAILLE_DIV[s.club.div] || 12;
+  const force =
+    s.club.prestige + (s.tempsJeu > 55 ? (s.note - 70) * 0.5 : 0) + rint(-18, 18);
+  const classement = clamp(Math.round(equipes - (force / 100) * (equipes - 1)), 1, equipes);
+
+  let objectif, atteint;
+  if (s.club.prestige >= 85) {
+    objectif = "Terminer sur le podium";
+    atteint = classement <= 3;
+  } else if (s.club.prestige >= 65) {
+    objectif = "Jouer les phases finales (top 6)";
+    atteint = classement <= 6;
+  } else if (s.club.prestige >= 50) {
+    objectif = "Finir dans la première moitié";
+    atteint = classement <= Math.ceil(equipes / 2);
+  } else {
+    objectif = "Assurer le maintien";
+    atteint = classement <= equipes - 2;
+  }
+
+  const perso = s.tempsJeu > 55 && s.note >= 70;
+  let verdict;
+  if (atteint && perso) verdict = "Une saison pleine. Le club s'appuie sur toi.";
+  else if (atteint) verdict = "Objectif rempli par le groupe ; ton rôle est resté discret.";
+  else if (perso) verdict = "Résultats décevants, mais ta saison personnelle surnage.";
+  else verdict = "Un passage à vide qui inquiète le staff technique.";
+
+  return {
+    saison: s.saison,
+    club: s.club.nom,
+    div: s.club.div,
+    matchs,
+    essais,
+    points,
+    note: s.note,
+    classement,
+    equipes,
+    objectif,
+    atteint,
+    verdict,
+    manchette: manchette(s, atteint, perso),
+    revenus: s.salaire * 12 + (titreGagne ? 300 : 0), // k€ : salaire & primes
+    titre: titreGagne,
+    faitMarquant: chance(0.6) ? pick(FAITS_MARQUANTS) : null,
+  };
+}
 
 /** Catalogue des blessures graves possibles. */
 const BLESSURES = [
