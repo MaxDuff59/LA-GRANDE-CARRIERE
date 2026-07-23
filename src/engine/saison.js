@@ -97,15 +97,18 @@ const BLESSURES = [
 /** Baisse maximale de temps de jeu tolérée la saison d'arrivée dans un club. */
 const BAISSE_MAX_TRANSFERT = 8;
 
+/** Durée d'une saison en semaines, pour convertir une absence en matchs manqués. */
+const SEMAINES_SAISON = 34;
+
 /**
- * Temps de jeu en % selon l'écart de niveau avec le club.
- * @param {boolean} blesse - le joueur sort d'une blessure (saison précédente).
+ * Temps de jeu en % : le statut du joueur au club. Il ne dépend que du niveau
+ * relatif et de la relation au coach — jamais des blessures ou cartons, qui ne
+ * coûtent que des matchs sur la saison en cours (voir simulerSaison).
  */
-function calculerTempsJeu(s, { blesse = false } = {}) {
+function calculerTempsJeu(s) {
   const attendu = s.club.prestige * 0.72 + 18;
   const ecart = s.note - attendu;
   let cible = 45 + ecart * 3.4 + (s.relationCoach - 50) * 0.4;
-  if (s.suspension > 0) cible -= s.suspension * 2.2;
   if (s.age >= 33) cible *= 0.88;
   cible = clamp(cible, 4, 96);
 
@@ -118,15 +121,17 @@ function calculerTempsJeu(s, { blesse = false } = {}) {
   const vitesse = cible > actuel ? 0.55 : 0.35;
   let tj = actuel + (cible - actuel) * vitesse + rint(-4, 4);
 
-  // Avant 30 ans, une carrière se construit : hors blessure ou carton, le
-  // temps de jeu ne redescend pas. Seule exception, la saison d'arrivée dans
-  // un nouveau club (ancienneteClub remis à 0 par la signature) — s'y battre
-  // pour sa place peut coûter quelques points, mais jamais plus que ~8 %.
-  const carton = s.suspension > 0;
-  if (s.age < 30 && !blesse && !carton) {
-    const vientDArriver = s.ancienneteClub === 0;
-    const plancher = vientDArriver ? actuel - BAISSE_MAX_TRANSFERT : actuel;
-    tj = Math.max(tj, plancher);
+  // Avant 30 ans, le statut ne fait que grimper d'une saison à l'autre : jamais
+  // il ne stagne ni ne recule. Il monte vite quand le niveau le mérite (la
+  // cible tire vers le haut), sinon au minimum de quelques points. Seule
+  // exception, la saison d'arrivée dans un nouveau club (ancienneteClub remis à
+  // 0 par la signature), où se faire une place peut coûter jusqu'à ~8 % avant
+  // de repartir vers le haut dès la saison suivante.
+  if (s.age < 30) {
+    tj =
+      s.ancienneteClub === 0
+        ? Math.max(tj, actuel - BAISSE_MAX_TRANSFERT)
+        : Math.max(tj, actuel + rint(2, 5));
   }
 
   return Math.round(clamp(tj, 4, 96));
@@ -179,19 +184,24 @@ function distinctions(s, essais, log) {
 export function simulerSaison(s) {
   const log = [];
 
-  // Purge de la blessure de la saison précédente
-  const blesseLaSaisonPassee = Boolean(s.blessure);
+  // Blessure et suspension en cours (héritées de la saison passée, d'un
+  // événement ou d'un carton) coûtent des semaines d'indisponibilité. Elles
+  // réduisent le nombre de matchs de CETTE saison, mais ne touchent jamais au
+  // % de temps de jeu — donc elles ne pèsent pas sur les saisons futures.
+  let semainesManquees = 0;
   if (s.blessure) {
+    semainesManquees += s.blessure.semaines;
     log.push(`🩹 ${s.blessure.nom} : ${s.blessure.semaines} semaines d'absence.`);
     s.blessure = null;
   }
-
-  // Temps de jeu et volume de matchs
-  s.tempsJeu = calculerTempsJeu(s, { blesse: blesseLaSaisonPassee });
   if (s.suspension > 0) {
-    log.push(`🟥 ${s.suspension} semaines de suspension purgées.`);
+    semainesManquees += s.suspension;
+    log.push(`🟥 ${s.suspension} semaines de suspension.`);
     s.suspension = 0;
   }
+
+  // Temps de jeu (statut au club), indépendant des indisponibilités.
+  s.tempsJeu = calculerTempsJeu(s);
 
   // Un international manque une partie de la saison de club pendant son
   // tournoi — surtout un sudiste, dont le Rugby Championship tombe en
@@ -202,7 +212,11 @@ export function simulerSaison(s) {
     const key = CIRCUIT_NATION[s.nationId];
     if (key) facteurClub = 1 - CIRCUITS[key].absenceClub * 0.6;
   }
-  const matchs = Math.round(matchsMax * (s.tempsJeu / 100) * facteurClub);
+  // Disponibilité réelle : une longue absence peut amputer une grosse part de
+  // la saison (un joueur à 90 % de temps de jeu blessé 17 semaines ne dispute
+  // qu'une demi-saison), sans que son statut au club en soit affecté.
+  const dispo = clamp(1 - semainesManquees / SEMAINES_SAISON, 0.05, 1);
+  const matchs = Math.round(matchsMax * (s.tempsJeu / 100) * facteurClub * dispo);
   s.carriere.matchs += matchs;
 
   // Essais
