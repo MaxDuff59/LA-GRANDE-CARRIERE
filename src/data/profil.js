@@ -4,7 +4,7 @@
  */
 
 /**
- * mod        : bonus/malus appliqués aux attributs de départ
+ * mod        : bonus/malus appliqués aux attributs de départ (sur 100)
  * selecDiff  : multiplicateur du seuil de sélection nationale
  *              (1.45 = il faut être 45 % meilleur pour être appelé)
  */
@@ -12,49 +12,49 @@ export const NATIONS = [
   {
     id: "fr", nom: "France", flag: "🇫🇷", tier: 1,
     desc: "Le Top 14 sous les yeux. Concurrence maximale.",
-    mod: { technique: 1, vision: 1 },
+    mod: { technique: 3, vision: 3 },
     selecDiff: 1.0,
   },
   {
     id: "nz", nom: "Nouvelle-Zélande", flag: "🇳🇿", tier: 1,
     desc: "Né avec un ballon. Mais 5 millions de concurrents.",
-    mod: { technique: 2, vision: 2, vitesse: 1 },
+    mod: { technique: 7, vision: 7, vitesse: 3 },
     selecDiff: 1.45,
   },
   {
     id: "za", nom: "Afrique du Sud", flag: "🇿🇦", tier: 1,
     desc: "Le combat d'abord. Physique hors norme.",
-    mod: { puissance: 3, mental: 1 },
+    mod: { puissance: 10, mental: 3 },
     selecDiff: 1.35,
   },
   {
     id: "ie", nom: "Irlande", flag: "🇮🇪", tier: 1,
     desc: "Discipline, structure, intelligence de jeu.",
-    mod: { vision: 2, mental: 2 },
+    mod: { vision: 7, mental: 7 },
     selecDiff: 1.15,
   },
   {
     id: "ar", nom: "Argentine", flag: "🇦🇷", tier: 1,
     desc: "La mêlée dans le sang, l'exil comme destin.",
-    mod: { puissance: 2, mental: 2 },
+    mod: { puissance: 7, mental: 7 },
     selecDiff: 0.85,
   },
   {
     id: "fj", nom: "Fidji", flag: "🇫🇯", tier: 2,
     desc: "Talent brut, offload magique. Structures fragiles.",
-    mod: { vitesse: 3, technique: 2, endurance: -1 },
+    mod: { vitesse: 10, technique: 7, endurance: -3 },
     selecDiff: 0.55,
   },
   {
     id: "ge", nom: "Géorgie", flag: "🇬🇪", tier: 2,
     desc: "Une nation de piliers. Peu de vitrine.",
-    mod: { puissance: 3, endurance: 1, vision: -1 },
+    mod: { puissance: 10, endurance: 3, vision: -3 },
     selecDiff: 0.50,
   },
   {
     id: "it", nom: "Italie", flag: "🇮🇹", tier: 2,
     desc: "Le Tournoi tous les ans. Les victoires, moins souvent.",
-    mod: { mental: 1, puissance: 1 },
+    mod: { mental: 3, puissance: 3 },
     selecDiff: 0.65,
   },
 ];
@@ -67,27 +67,27 @@ export const ORIGINES = [
   {
     id: "formation", nom: "Centre de formation",
     desc: "Structuré depuis 14 ans. Tout est cadré.",
-    mod: { technique: 3, mental: 2 }, argent: 0, hype: 5,
+    mod: { technique: 10, mental: 7 }, argent: 0, hype: 5,
   },
   {
     id: "village", nom: "Club de village",
     desc: "Terrain gras, troisième mi-temps, apprentissage brut.",
-    mod: { puissance: 2, mental: 3, technique: -1 }, argent: 0, hype: -5,
+    mod: { puissance: 7, mental: 10, technique: -3 }, argent: 0, hype: -5,
   },
   {
     id: "reconversion", nom: "Reconversion athlétique",
     desc: "Sprinteur avant. Rugby découvert à 17 ans.",
-    mod: { vitesse: 5, endurance: 2, technique: -4, vision: -3 }, argent: 0, hype: 0,
+    mod: { vitesse: 17, endurance: 7, technique: -13, vision: -10 }, argent: 0, hype: 0,
   },
   {
     id: "fils", nom: "Fils de joueur pro",
     desc: "Le nom ouvre des portes. Et attire les regards.",
-    mod: { vision: 3, mental: -2 }, argent: 40, hype: 20,
+    mod: { vision: 10, mental: -7 }, argent: 40, hype: 20,
   },
   {
     id: "iles", nom: "Filière îles du Pacifique",
     desc: "Arrivé à 18 ans, sans repères, avec le feu.",
-    mod: { puissance: 2, vitesse: 3, mental: 3, vision: -2 }, argent: -10, hype: 5,
+    mod: { puissance: 7, vitesse: 10, mental: 10, vision: -7 }, argent: -10, hype: 5,
   },
 ];
 

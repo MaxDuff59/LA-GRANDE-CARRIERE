@@ -29,7 +29,7 @@ export function Jauge({ label, valeur, max = 100, couleur = C.accent, suffixe = 
 }
 
 /** Ligne d'attribut compacte, utilisée dans le panneau de stats. */
-export function LigneAttribut({ nom, valeur, max = 30 }) {
+export function LigneAttribut({ nom, valeur, max = 100 }) {
   const pct = clamp((valeur / max) * 100);
   return (
     <div>

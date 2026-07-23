@@ -16,7 +16,8 @@ export function noteGlobale(stats, poste) {
   for (const [attr, poids] of Object.entries(poste.poids)) {
     n += (stats[attr] || 0) * poids;
   }
-  return clamp(Math.round(n * 2.35 + 12), 20, 99);
+  // `n` est une moyenne pondérée sur 100 ; la note reste bornée 20-99.
+  return clamp(Math.round(n * 0.705 + 12), 20, 99);
 }
 
 /**
@@ -31,16 +32,22 @@ export function creerCarriere(setup, perks = []) {
   const hygiene = getHygiene(setup.hygiene);
   const agent = getAgent(setup.agent);
 
-  // Attributs de départ = base du poste + modificateurs + variance
+  // Attributs de départ = base du poste + modificateurs + variance.
+  // Bornés à 72 : personne ne débute à 18 ans avec un attribut d'élite,
+  // ça se gagne par la progression (voir progression.js).
   const stats = { ...poste.base };
   for (const k in nation.mod) stats[k] = (stats[k] || 0) + nation.mod[k];
   for (const k in origine.mod) stats[k] = (stats[k] || 0) + origine.mod[k];
-  for (const k in stats) stats[k] = clamp(stats[k] + rint(-2, 2), 1, 25);
-  if (perks.includes("buteur")) stats.technique += 3;
+  for (const k in stats) stats[k] = clamp(stats[k] + rint(-6, 6), 3, 72);
+  if (perks.includes("buteur")) stats.technique += 10;
 
-  // Premier club : dans le pays formateur, en bas de hiérarchie
-  const locaux = CLUBS.filter((c) => c.pays === nation.id && c.niveau >= 3);
-  const club = locaux.length ? pick(locaux) : pick(CLUBS.filter((c) => c.niveau >= 4));
+  // Premier club : celui choisi à la création si fourni, sinon tirage
+  // auto (Défi du jour, banc d'essai) dans le pays formateur.
+  let club = setup.club ? CLUBS.find((c) => c.nom === setup.club) : null;
+  if (!club) {
+    const locaux = CLUBS.filter((c) => c.pays === nation.id && c.niveau >= 3);
+    club = locaux.length ? pick(locaux) : pick(CLUBS.filter((c) => c.niveau >= 4));
+  }
 
   return {
     nom: setup.nom || "Joueur",
@@ -118,7 +125,7 @@ export function normaliser(s) {
   s.usure = clamp(s.usure, 0, 100);
   s.relationCoach = clamp(s.relationCoach, 0, 100);
   s.tempsJeu = clamp(s.tempsJeu, 0, 100);
-  for (const k in s.stats) s.stats[k] = clamp(s.stats[k], 1, 30);
+  for (const k in s.stats) s.stats[k] = clamp(s.stats[k], 1, 100);
   s.note = noteGlobale(s.stats, s.poste);
   return s;
 }

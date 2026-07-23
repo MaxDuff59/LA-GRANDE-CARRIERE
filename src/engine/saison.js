@@ -118,7 +118,7 @@ export function simulerSaison(s) {
   s.carriere.matchs += matchs;
 
   // Essais
-  const facteur = (s.note / 70) * (0.6 + s.stats.vitesse / 30);
+  const facteur = (s.note / 70) * (0.6 + s.stats.vitesse / 100);
   const essais = Math.max(0, Math.round(matchs * s.poste.essaiRate * facteur * rnd(0.6, 1.5)));
   s.carriere.essais += essais;
 
@@ -126,7 +126,7 @@ export function simulerSaison(s) {
   let points = essais * 5;
   const estButeur = s.poste.buteur || s.perks.includes("buteur");
   if (estButeur && s.note > 60) {
-    points += Math.round(matchs * rnd(4, 11) * (s.stats.technique / 18));
+    points += Math.round(matchs * rnd(4, 11) * (s.stats.technique / 60));
   }
   s.carriere.points += points;
 
@@ -148,6 +148,15 @@ export function simulerSaison(s) {
     s.blessure = b;
     s.usure = clamp(s.usure + b.usure, 0, 100);
     s.moral -= 12;
+
+    // Une blessure grave laisse des traces : les qualités physiques
+    // reculent, d'autant plus que l'absence est longue et le joueur âgé.
+    const sev = b.semaines / 34;
+    const rechute = 1 + (s.age > 30 ? 0.5 : 0);
+    s.stats.vitesse = clamp(s.stats.vitesse - rnd(1.5, 5.5) * sev * rechute, 1, 100);
+    s.stats.puissance = clamp(s.stats.puissance - rnd(0.5, 3.0) * sev * rechute, 1, 100);
+    s.stats.endurance = clamp(s.stats.endurance - rnd(1.0, 4.0) * sev * rechute, 1, 100);
+
     log.push(`💥 Blessure : ${b.nom}.`);
   }
 
@@ -160,8 +169,10 @@ export function simulerSaison(s) {
   const mult = s.perks.includes("argent") ? 1.25 : 1;
   s.argent += Math.round(((s.salaire * 12) / 1000 * 10 + prime) * mult);
 
-  // Dérive des jauges
-  s.moral = clamp(s.moral + (s.tempsJeu > 60 ? 5 : -7) + rint(-4, 4), 0, 100);
+  // Dérive des jauges. Le moral suit le temps de jeu de façon graduée
+  // (neutre vers 55 %) plutôt qu'en falaise : sans ça, tout joueur un peu
+  // juste s'effondre et prend sa retraite prématurément.
+  s.moral = clamp(s.moral + (s.tempsJeu - 55) / 6 + rint(-4, 4), 0, 100);
   if (s.perks.includes("leader")) s.moral = Math.max(s.moral, 30);
   s.reput = clamp(s.reput + (s.tempsJeu > 55 ? 2 : -2), 0, 100);
   s.relationCoach = clamp(s.relationCoach + rint(-8, 8), 0, 100);

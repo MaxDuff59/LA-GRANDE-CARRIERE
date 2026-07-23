@@ -70,12 +70,12 @@ export function calculerScore(s) {
  * barème au-dessus, relance le test et recale ces seuils.
  */
 const RANGS = [
-  { min: 9800, titre: "LÉGENDE ABSOLUE", couleur: "#E8C547" },
-  { min: 8200, titre: "ICÔNE", couleur: "#E8C547" },
-  { min: 6800, titre: "GRAND JOUEUR", couleur: "#7FB069" },
-  { min: 5200, titre: "INTERNATIONAL SOLIDE", couleur: "#7FB069" },
-  { min: 3500, titre: "BON PROFESSIONNEL", couleur: "#9BA7B4" },
-  { min: 1800, titre: "CARRIÈRE HONNÊTE", couleur: "#9BA7B4" },
+  { min: 7800, titre: "LÉGENDE ABSOLUE", couleur: "#E8C547" },
+  { min: 5900, titre: "ICÔNE", couleur: "#E8C547" },
+  { min: 4900, titre: "GRAND JOUEUR", couleur: "#7FB069" },
+  { min: 3900, titre: "INTERNATIONAL SOLIDE", couleur: "#7FB069" },
+  { min: 2800, titre: "BON PROFESSIONNEL", couleur: "#9BA7B4" },
+  { min: 1300, titre: "CARRIÈRE HONNÊTE", couleur: "#9BA7B4" },
   { min: 0, titre: "PASSAGE ÉCLAIR", couleur: "#8A7F76" },
 ];
 
@@ -85,5 +85,5 @@ export function rang(score) {
 
 /** Jetons gagnés en fin de carrière (hors Défi du jour). */
 export function jetonsGagnes(score) {
-  return Math.floor(score / 800) + 1;
+  return Math.floor(score / 650) + 1;
 }

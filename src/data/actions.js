@@ -23,9 +23,9 @@
  *   txt    : conséquence affichée au joueur
  *   effet  : (s) => void — mute l'état (mêmes champs que dans events.js)
  *
- * ÉQUILIBRAGE — la règle : à attributs moyens (~14), les deux options
- * doivent tourner autour de 55-60 % de réussite. C'est la STAT qui déplace
- * le curseur, pas l'option. Une option plus risquée doit payer davantage.
+ * ÉQUILIBRAGE — la règle : à attributs moyens (~47 sur 100), les deux
+ * options doivent tourner autour de 55-60 % de réussite. C'est la STAT qui
+ * déplace le curseur, pas l'option. Une option plus risquée doit payer plus.
  */
 
 const AVANTS = ["pilier", "talonneur", "deuxieme", "troisieme", "numero8"];
@@ -56,7 +56,7 @@ const LISTE = [
         label: "Faire la passe",
         issues: [
           {
-            poids: (s) => 20 + s.stats.vision * 1.6 + s.stats.technique * 0.8,
+            poids: (s) => 20 + s.stats.vision * 0.48 + s.stats.technique * 0.24,
             txt: "Tu fixes, tu donnes au cordeau. Essai à l'aile, plein axe. Le geste juste.",
             effet: (s) => {
               s.moral += 8;
@@ -65,7 +65,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 45 - s.stats.vision * 0.6,
+            poids: (s) => 45 - s.stats.vision * 0.18,
             txt: "Passe télégraphiée. Le centre adverse la lit, l'intercepte, et part de 80 mètres. Silence dans le stade.",
             effet: (s) => {
               s.moral -= 10;
@@ -79,7 +79,7 @@ const LISTE = [
         label: "Y aller en solo",
         issues: [
           {
-            poids: (s) => 14 + s.stats.vitesse * 1.9 + s.stats.puissance * 0.9,
+            poids: (s) => 14 + s.stats.vitesse * 0.57 + s.stats.puissance * 0.27,
             txt: "Cadrage-débordement. Tu aplatis sous les poteaux sans être touché. Le genre d'essai qui tourne en boucle.",
             effet: (s) => {
               essai(s);
@@ -88,7 +88,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 48 - s.stats.vitesse * 0.7,
+            poids: (s) => 48 - s.stats.vitesse * 0.21,
             txt: "Plaqué à cinq mètres, ballon rendu. Ton ailier était seul. Le banc hurle, le coach ne dit rien — c'est pire.",
             effet: (s) => {
               s.usure += 4;
@@ -113,21 +113,23 @@ const LISTE = [
         label: "Taper les perches",
         issues: [
           {
-            poids: (s) => 12 + s.stats.technique * 2.2 + s.stats.mental * 1.1,
+            poids: (s) => 12 + s.stats.technique * 0.66 + s.stats.mental * 0.33,
             txt: "Frappe pure. Le ballon passe à un mètre au-dessus de la barre. Victoire au buzzer.",
             effet: (s) => {
               points(s, 3);
               s.moral += 12;
               s.reput += 8;
               s.relationCoach += 6;
+              s.stats.mental += 1; // réussir sous pression forge le mental
             },
           },
           {
-            poids: (s) => 52 - s.stats.mental * 0.8,
+            poids: (s) => 52 - s.stats.mental * 0.24,
             txt: "Trop appuyé. Le ballon meurt sur le poteau gauche. Défaite. Tu mets vingt minutes à sortir des vestiaires.",
             effet: (s) => {
               s.moral -= 13;
               s.reput -= 5;
+              s.stats.mental -= 1; // et rater laisse un doute
             },
           },
         ],
@@ -136,7 +138,7 @@ const LISTE = [
         label: "Jouer la touche à 5 mètres",
         issues: [
           {
-            poids: (s) => 16 + s.stats.puissance * 1.0 + s.stats.mental * 0.9,
+            poids: (s) => 16 + s.stats.puissance * 0.3 + s.stats.mental * 0.27,
             txt: "Touche assurée, maul lancé, l'arbitre lève le bras. Essai collectif, victoire de cinq points. Le pack te porte.",
             effet: (s) => {
               points(s, 5);
@@ -146,7 +148,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 60 - s.stats.mental * 0.7,
+            poids: (s) => 60 - s.stats.mental * 0.21,
             txt: "Maul écroulé, mêlée pour eux, coup de pied en tribunes. Fini. Tu as refusé trois points certains devant 20 000 personnes.",
             effet: (s) => {
               s.moral -= 9;
@@ -171,7 +173,7 @@ const LISTE = [
         label: "L'arrêter haut",
         issues: [
           {
-            poids: (s) => 26 + s.stats.technique * 1.2,
+            poids: (s) => 26 + s.stats.technique * 0.36,
             txt: "Épaule à hauteur de plexus, bras qui enveloppent. Plaquage énorme, ballon lâché, et l'arbitre laisse jouer.",
             effet: (s) => {
               s.reput += 7;
@@ -180,7 +182,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 40 - s.stats.technique * 0.9,
+            poids: (s) => 40 - s.stats.technique * 0.27,
             txt: "Contact tête contre tête. Rouge direct, pas de circonstance atténuante. Commission de discipline.",
             effet: (s) => {
               s.suspension += 3;
@@ -195,7 +197,7 @@ const LISTE = [
         label: "Plonger bas",
         issues: [
           {
-            poids: (s) => 30 + s.stats.technique * 1.0 + s.stats.puissance * 0.6,
+            poids: (s) => 30 + s.stats.technique * 0.3 + s.stats.puissance * 0.18,
             txt: "Plaquage aux chevilles, propre. Il tombe, le ballon est mort. Rien de spectaculaire, tout de juste.",
             effet: (s) => {
               s.relationCoach += 5;
@@ -205,7 +207,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 42 - s.stats.puissance * 0.8,
+            poids: (s) => 42 - s.stats.puissance * 0.24,
             txt: "Tu glisses, il te passe dessus avec un raffut. Essai plein axe. Le ralenti tourne toute la semaine.",
             effet: (s) => {
               s.moral -= 5;
@@ -231,7 +233,7 @@ const LISTE = [
         label: "Pousser le ballon porté",
         issues: [
           {
-            poids: (s) => 18 + s.stats.puissance * 1.5 + s.stats.endurance * 0.7,
+            poids: (s) => 18 + s.stats.puissance * 0.45 + s.stats.endurance * 0.21,
             txt: "Le maul avance de huit mètres sans jamais s'arrêter. Tu es au fond, ballon collé au ventre. Essai.",
             effet: (s) => {
               essai(s);
@@ -241,7 +243,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 46 - s.stats.puissance * 0.7,
+            poids: (s) => 46 - s.stats.puissance * 0.21,
             txt: "Maul stoppé net puis écroulé. Pénalité contre vous pour obstruction. Vous ne reverrez plus le ballon.",
             effet: (s) => {
               s.moral -= 8;
@@ -255,7 +257,7 @@ const LISTE = [
         label: "Ouvrir aux trois-quarts",
         issues: [
           {
-            poids: (s) => 22 + s.stats.vision * 1.4 + s.stats.technique * 0.7,
+            poids: (s) => 22 + s.stats.vision * 0.42 + s.stats.technique * 0.21,
             txt: "Ballon propre, deux temps de jeu, essai à l'aile opposée. Ce n'est pas le tien, mais c'est ta décision.",
             effet: (s) => {
               s.moral += 7;
@@ -264,7 +266,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 44 - s.stats.vision * 0.6,
+            poids: (s) => 44 - s.stats.vision * 0.18,
             txt: "Ballon lent, plaquage, grattage adverse. Le pack te fait comprendre au repli ce qu'il pense de ton choix.",
             effet: (s) => {
               s.moral -= 6;
@@ -288,7 +290,7 @@ const LISTE = [
         label: "Attaquer la mêlée, le faire craquer",
         issues: [
           {
-            poids: (s) => 18 + s.stats.puissance * 1.6 + s.stats.endurance * 0.7,
+            poids: (s) => 18 + s.stats.puissance * 0.48 + s.stats.endurance * 0.21,
             txt: "Tu prends l'ascendant à l'impact et tu ne le lâches plus. Il s'écroule. Pénalité, bras levé, et le stade qui gronde. C'est ton match.",
             effet: (s) => {
               s.reput += 8;
@@ -298,7 +300,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 44 - s.stats.puissance * 0.7,
+            poids: (s) => 44 - s.stats.puissance * 0.21,
             txt: "Tu montes trop haut en cherchant la pénalité. L'arbitre siffle contre toi, et te prévient : la prochaine, c'est jaune.",
             effet: (s) => {
               s.moral -= 7;
@@ -312,7 +314,7 @@ const LISTE = [
         label: "Assurer, sortir un ballon propre",
         issues: [
           {
-            poids: (s) => 34 + s.stats.technique * 1.0 + s.stats.endurance * 0.6,
+            poids: (s) => 34 + s.stats.technique * 0.3 + s.stats.endurance * 0.18,
             txt: "Mêlée stable, ballon au pied du numéro 8, jeu lancé sans perdre une seconde. Le travail de l'ombre.",
             effet: (s) => {
               s.relationCoach += 5;
@@ -320,7 +322,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 40 - s.stats.endurance * 0.7,
+            poids: (s) => 40 - s.stats.endurance * 0.21,
             txt: "Mêlée qui tourne malgré toi. Introduction rendue, occasion perdue. Le pack te regarde sans rien dire.",
             effet: (s) => {
               s.moral -= 4;
@@ -345,7 +347,7 @@ const LISTE = [
         label: "Relancer",
         issues: [
           {
-            poids: (s) => 10 + s.stats.vitesse * 1.7 + s.stats.vision * 1.0,
+            poids: (s) => 10 + s.stats.vitesse * 0.51 + s.stats.vision * 0.3,
             txt: "Tu prends le ballon à deux mains, tu élimines le premier, puis le deuxième. Cinquante mètres gagnés d'un coup. Le stade explose.",
             effet: (s) => {
               s.moral += 11;
@@ -354,7 +356,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 50 - s.stats.vitesse * 0.8,
+            poids: (s) => 50 - s.stats.vitesse * 0.24,
             txt: "Plaqué dans ton propre en-but, ballon gratté. Essai encaissé le plus bête de la saison.",
             effet: (s) => {
               s.moral -= 10;
@@ -369,7 +371,7 @@ const LISTE = [
         label: "Aplatir et taper en touche",
         issues: [
           {
-            poids: (s) => 34 + s.stats.technique * 1.1 + s.stats.mental * 0.5,
+            poids: (s) => 34 + s.stats.technique * 0.33 + s.stats.mental * 0.15,
             txt: "Renvoi aux 22 trouvé, quarante mètres, en touche. Sans génie, sans danger. Le coach hoche la tête.",
             effet: (s) => {
               s.relationCoach += 4;
@@ -377,7 +379,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 40 - s.stats.technique * 0.9,
+            poids: (s) => 40 - s.stats.technique * 0.27,
             txt: "Coup de pied vrillé qui reste dans le terrain. Contre-attaque, essai encaissé trois temps de jeu plus tard.",
             effet: (s) => {
               s.moral -= 7;
@@ -401,7 +403,7 @@ const LISTE = [
         label: "Aller gratter",
         issues: [
           {
-            poids: (s) => 20 + s.stats.technique * 1.3 + s.stats.puissance * 0.9,
+            poids: (s) => 20 + s.stats.technique * 0.39 + s.stats.puissance * 0.27,
             txt: "Appuis calés, dos plat, mains sur le ballon. L'arbitre siffle pour toi. Turnover dans leurs 22.",
             effet: (s) => {
               s.reput += 6;
@@ -410,7 +412,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 44 - s.stats.technique * 0.8,
+            poids: (s) => 44 - s.stats.technique * 0.24,
             txt: "Déblayé au moment où tu poses les mains. Pénalité contre toi pour non-libération, trois points encaissés.",
             effet: (s) => {
               s.moral -= 6;
@@ -424,7 +426,7 @@ const LISTE = [
         label: "Sécuriser le ruck",
         issues: [
           {
-            poids: (s) => 40 + s.stats.puissance * 0.8,
+            poids: (s) => 40 + s.stats.puissance * 0.24,
             txt: "Tu déblaies proprement les deux premiers arrivants. Ballon rapide, jeu qui continue. Personne ne le verra.",
             effet: (s) => {
               s.relationCoach += 4;
@@ -432,7 +434,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 34 - s.stats.endurance * 0.6,
+            poids: (s) => 34 - s.stats.endurance * 0.18,
             txt: "Tu arrives une demi-seconde trop tard, un genou dans les côtes. Ballon quand même sauvé, côtes moins.",
             effet: (s) => {
               s.usure += 4;
@@ -456,7 +458,7 @@ const LISTE = [
         label: "Sur le 2, ballon court",
         issues: [
           {
-            poids: (s) => 32 + s.stats.technique * 1.2,
+            poids: (s) => 32 + s.stats.technique * 0.36,
             txt: "Ballon court, sauteur servi à hauteur de bras. Maul, essai, victoire. Le geste le plus simple était le bon.",
             effet: (s) => {
               points(s, 5);
@@ -466,7 +468,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 38 - s.stats.technique * 0.8,
+            poids: (s) => 38 - s.stats.technique * 0.24,
             txt: "Lancer pas droit. Mêlée adverse, coup de pied en tribunes. Ta saison finit sur ce geste-là.",
             effet: (s) => {
               s.moral -= 12;
@@ -480,22 +482,24 @@ const LISTE = [
         label: "En fond de touche, dans le trou",
         issues: [
           {
-            poids: (s) => 14 + s.stats.technique * 1.4 + s.stats.vision * 1.0,
+            poids: (s) => 14 + s.stats.technique * 0.42 + s.stats.vision * 0.3,
             txt: "Ballon tendu de vingt mètres, pile dans les mains du troisième ligne lancé. Essai en coin, personne ne l'a vu venir.",
             effet: (s) => {
               points(s, 5);
               s.moral += 16;
               s.reput += 12;
               s.relationCoach += 9;
+              s.stats.vision += 1; // le geste juste sous pression affine la lecture
             },
           },
           {
-            poids: (s) => 56 - s.stats.vision * 0.8,
+            poids: (s) => 56 - s.stats.vision * 0.24,
             txt: "Interception en fond de touche. Contre-attaque de quatre-vingts mètres, essai encaissé, sirène. Tu restes assis sur la pelouse un long moment.",
             effet: (s) => {
               s.moral -= 15;
               s.reput -= 8;
               s.relationCoach -= 10;
+              s.stats.mental -= 1;
             },
           },
         ],
@@ -515,7 +519,7 @@ const LISTE = [
         label: "Taper en touche et défendre",
         issues: [
           {
-            poids: (s) => 30 + s.stats.technique * 1.1 + s.stats.mental * 0.8,
+            poids: (s) => 30 + s.stats.technique * 0.33 + s.stats.mental * 0.24,
             txt: "Coup de pied en spirale, quarante-cinq mètres, sortie franche. Touche adverse, sirène, victoire. Zéro romantisme, trois points au classement.",
             effet: (s) => {
               s.moral += 7;
@@ -524,7 +528,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 42 - s.stats.mental * 0.9,
+            poids: (s) => 42 - s.stats.mental * 0.27,
             txt: "Le coup de pied reste dans le terrain. Contre-attaque, six temps de jeu, essai encaissé à la sirène. Défaite.",
             effet: (s) => {
               s.moral -= 11;
@@ -538,7 +542,7 @@ const LISTE = [
         label: "Garder le ballon et jouer les temps",
         issues: [
           {
-            poids: (s) => 20 + s.stats.vision * 1.5 + s.stats.mental * 0.9,
+            poids: (s) => 20 + s.stats.vision * 0.45 + s.stats.mental * 0.27,
             txt: "Douze temps de jeu, pas un ballon lâché, la sirène qui sonne pendant un ruck. Tu tapes en tribunes. Maîtrise totale.",
             effet: (s) => {
               s.moral += 10;
@@ -547,7 +551,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 48 - s.stats.mental * 0.8,
+            poids: (s) => 48 - s.stats.mental * 0.24,
             txt: "Neuvième temps de jeu, ballon gratté à vingt mètres de ta ligne. Pénalité, égalisation, match nul. Le vestiaire est glacial.",
             effet: (s) => {
               s.moral -= 9;
@@ -571,7 +575,7 @@ const LISTE = [
         label: "Y aller, on ne laisse pas un coéquipier",
         issues: [
           {
-            poids: (s) => 34 + s.stats.mental * 0.9,
+            poids: (s) => 34 + s.stats.mental * 0.27,
             txt: "Tu arrives le premier, tu repousses sans frapper. L'arbitre ne siffle rien. Le vestiaire, lui, a tout vu.",
             effet: (s) => {
               s.reput += 5;
@@ -580,7 +584,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 40 - s.stats.mental * 0.7,
+            poids: (s) => 40 - s.stats.mental * 0.21,
             txt: "Un coup de poing dans la mêlée. La vidéo le retrouve. Rouge, citation, commission.",
             effet: (s) => {
               s.suspension += 4;
@@ -595,7 +599,7 @@ const LISTE = [
         label: "Rester à distance",
         issues: [
           {
-            poids: (s) => 24 + s.stats.mental * 0.9,
+            poids: (s) => 24 + s.stats.mental * 0.27,
             txt: "Tu restes en dehors et tu vas parler à l'arbitre au calme. Carton jaune pour eux, pénalité pour vous. La tête froide a payé.",
             effet: (s) => {
               s.reput += 4;
@@ -629,7 +633,7 @@ const LISTE = [
         label: "Contester fermement",
         issues: [
           {
-            poids: (s) => 16 + s.stats.mental * 1.4 + s.stats.vision * 0.6,
+            poids: (s) => 16 + s.stats.mental * 0.42 + s.stats.vision * 0.18,
             txt: "Tu poses les faits, calmement, sans hausser le ton. Il te répond, il t'écoute. Les trois décisions suivantes tournent en votre faveur.",
             effet: (s) => {
               s.reput += 7;
@@ -638,7 +642,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 44 - s.stats.mental * 0.9,
+            poids: (s) => 44 - s.stats.mental * 0.27,
             txt: "Il recule de dix mètres et te met un jaune pour contestation. Le capitanat, c'est aussi savoir se taire.",
             effet: (s) => {
               s.reput -= 5;
@@ -652,7 +656,7 @@ const LISTE = [
         label: "Encaisser et rassembler l'équipe",
         issues: [
           {
-            poids: (s) => 38 + s.stats.mental * 0.8,
+            poids: (s) => 38 + s.stats.mental * 0.24,
             txt: "« Oui monsieur. » Tu rassembles les avants derrière les poteaux et tu remets tout le monde en ordre. Vous ne concédez plus rien.",
             effet: (s) => {
               s.moral += 5;
@@ -661,7 +665,7 @@ const LISTE = [
             },
           },
           {
-            poids: (s) => 32 - s.stats.mental * 0.4,
+            poids: (s) => 32 - s.stats.mental * 0.12,
             txt: "Tu encaisses sans rien dire. Deux pénalités plus tard, même faute, même silence. Le groupe attendait autre chose de toi.",
             effet: (s) => {
               s.moral -= 6;

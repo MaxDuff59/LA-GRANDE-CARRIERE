@@ -366,8 +366,8 @@ export const EVENTS = [
       {
         label: "Accepter la reconversion",
         effet: (s) => {
-          s.stats.technique -= 2;
-          s.stats.mental += 3;
+          s.stats.technique -= 7;
+          s.stats.mental += 10;
           s.tempsJeu += 20;
           s.flags.reconverti = true;
           return "Nouveau poste, nouveau départ. Les premiers mois ont été durs.";

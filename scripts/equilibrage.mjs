@@ -129,7 +129,7 @@ for (const p of POSTES) {
 // ── 3. Taux de réussite des actions de match ──────────────────────────
 // Calculé exactement à partir des poids, pas par échantillonnage.
 // Convention : la PREMIÈRE issue d'un choix est celle qui réussit.
-console.log("\n── Actions de match : réussite de la 1ʳᵉ issue (moyen 14 / élite 22) ──");
+console.log("\n── Actions de match : réussite de la 1ʳᵉ issue (moyen 47 / élite 73) ──");
 
 const profil = (v) => ({
   stats: { puissance: v, vitesse: v, technique: v, vision: v, mental: v, endurance: v },
@@ -167,11 +167,11 @@ const ev = (choix, s) => {
 
 for (const a of ACTIONS) {
   for (const c of a.choix) {
-    const p14 = probas(c, profil(14));
-    const p22 = probas(c, profil(22));
+    const p14 = probas(c, profil(47));
+    const p22 = probas(c, profil(73));
     if (!p14 || !p22) throw new Error(`Poids invalides sur "${a.id}".`);
     const [moyen, elite] = [p14[0] * 100, p22[0] * 100];
-    const [ev14, ev22] = [ev(c, profil(14)), ev(c, profil(22))];
+    const [ev14, ev22] = [ev(c, profil(47)), ev(c, profil(73))];
 
     const ok = moyen >= 35 && moyen <= 80 && elite >= moyen && ev14 >= -2 && ev22 > ev14;
     if (!ok) erreurs++;
