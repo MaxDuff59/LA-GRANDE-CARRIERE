@@ -10,6 +10,7 @@ const COULEURS = {
   stat: C.txt2,
   conseq: C.txt,
   action: C.ambre,
+  hygiene: C.nuit,
   event: C.txt,
   info: C.txt,
 };

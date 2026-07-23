@@ -28,6 +28,7 @@ import { POSTES } from "../src/data/postes.js";
 import { NATIONS, ORIGINES, HYGIENES, AGENTS } from "../src/data/profil.js";
 import { EVENTS } from "../src/data/events.js";
 import { ACTIONS } from "../src/data/actions.js";
+import { VIE } from "../src/data/vie.js";
 import { creerCarriere, rehydrater, normaliser, noteGlobale } from "../src/engine/joueur.js";
 import { progression } from "../src/engine/progression.js";
 import { simulerSaison } from "../src/engine/saison.js";
@@ -61,6 +62,19 @@ function simulerCarriere(setup, perks = []) {
           throw new Error(`L'action "${a.id}" a une issue sans texte.`);
         }
         issue.effet(s);
+        normaliser(s);
+      }
+    }
+
+    // Hygiène de vie : répétable, ~1 saison sur 2.
+    if (chance(0.48)) {
+      const dispoVie = VIE.filter((e) => !e.cond || e.cond(s));
+      if (dispoVie.length) {
+        const e = pickPondere(dispoVie);
+        const conseq = pick(e.choix).effet(s);
+        if (typeof conseq !== "string") {
+          throw new Error(`L'événement hygiène "${e.id}" ne retourne pas de texte.`);
+        }
         normaliser(s);
       }
     }

@@ -12,6 +12,7 @@ export const C = {
   or: "#E8C547",
   rouge: "#B4342A",
   ambre: "#D4A03C",
+  nuit: "#8B7BC4", // événements « hygiène de vie » (hors du terrain)
 };
 
 export const S = {
