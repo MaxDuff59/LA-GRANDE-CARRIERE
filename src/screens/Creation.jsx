@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { POSTES } from "../data/postes.js";
 import { NATIONS, ORIGINES, HYGIENES, AGENTS } from "../data/profil.js";
+import { clubsDeDepart } from "../data/clubs.js";
 import { C, S, optionStyle } from "../styles/theme.js";
 import { Bouton } from "../components/Bouton.jsx";
 
@@ -37,6 +38,19 @@ const ETAPES = [
     sous: "L'argent, les transferts, et les portes qui s'ouvrent.",
     options: AGENTS,
   },
+  {
+    cle: "club",
+    titre: "Ton premier contrat",
+    sous: "Trois clubs veulent te faire signer. Jouer beaucoup en bas, ou te battre pour ta place plus haut ?",
+    type: "club",
+  },
+];
+
+/** Ce que chaque club de départ dit du choix, selon son rang de prestige. */
+const HINTS_CLUB = [
+  "Tu joueras d'entrée. Vitrine modeste, mais du temps de jeu garanti.",
+  "Un bon compromis entre exposition et temps de jeu.",
+  "Plus de lumière et un meilleur effectif — il faudra gagner sa place.",
 ];
 
 const SETUP_VIDE = {
@@ -46,11 +60,18 @@ const SETUP_VIDE = {
   origine: null,
   hygiene: null,
   agent: null,
+  club: null,
 };
 
 export function Creation({ onValider, onRetour }) {
   const [setup, setSetup] = useState(SETUP_VIDE);
   const [index, setIndex] = useState(0);
+
+  // Éventail de clubs, stable tant que la nation ne change pas.
+  const clubs = useMemo(
+    () => (setup.nation ? clubsDeDepart(setup.nation, 3) : []),
+    [setup.nation]
+  );
 
   const etape = ETAPES[index];
   const estDerniere = index === ETAPES.length - 1;
@@ -83,6 +104,33 @@ export function Creation({ onValider, onRetour }) {
             maxLength={22}
             style={S.input}
           />
+        ) : etape.type === "club" ? (
+          <div style={{ marginBottom: 14 }}>
+            {clubs.map((c, i) => (
+              <div
+                key={c.nom}
+                onClick={() => setSetup({ ...setup, club: c.nom })}
+                style={optionStyle(setup.club === c.nom)}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{c.nom}</div>
+                  <div style={{ fontSize: 12, color: C.txt2 }}>
+                    {c.div} · prestige {c.prestige}
+                  </div>
+                </div>
+                <div style={{ fontSize: 12.5, color: C.txt2, marginTop: 3 }}>
+                  {HINTS_CLUB[i] || ""}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div style={{ marginBottom: 14 }}>
             {etape.options.map((o) => (

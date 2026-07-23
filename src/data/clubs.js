@@ -71,3 +71,30 @@ export const MATCHS_PAR_DIV = {
 /** Helpers pratiques si tu ajoutes des règles liées aux clubs. */
 export const getClub = (nom) => CLUBS.find((c) => c.nom === nom);
 export const clubsParPays = (pays) => CLUBS.filter((c) => c.pays === pays);
+
+/**
+ * Éventail de premiers clubs proposés à un jeune de 18 ans, du plus
+ * modeste au plus huppé. Un club par tranche de prestige, tiré au hasard
+ * dans sa tranche : deux parties ne proposent pas les mêmes clubs, mais
+ * il y a toujours un vrai choix — jouer beaucoup en bas, ou se battre
+ * pour du temps de jeu dans une meilleure équipe.
+ */
+export function clubsDeDepart(nationId, n = 3) {
+  let pool = CLUBS.filter((c) => c.pays === nationId && c.niveau >= 3);
+  if (pool.length < n) {
+    const appoint = CLUBS.filter((c) => c.niveau >= 3 && !pool.includes(c));
+    pool = [...pool, ...appoint];
+  }
+  pool = [...pool].sort((a, b) => a.prestige - b.prestige);
+  if (pool.length <= n) return pool;
+
+  const taille = pool.length / n;
+  const choisis = [];
+  for (let i = 0; i < n; i++) {
+    const debut = Math.floor(i * taille);
+    const fin = Math.max(Math.floor((i + 1) * taille), debut + 1);
+    const tranche = pool.slice(debut, fin);
+    choisis.push(tranche[Math.floor(Math.random() * tranche.length)]);
+  }
+  return choisis;
+}
