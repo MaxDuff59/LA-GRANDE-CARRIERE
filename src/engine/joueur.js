@@ -118,6 +118,47 @@ export function rehydrater(s) {
   return copie;
 }
 
+/** Champs suivis pour afficher l'impact d'un choix. `bon` = un + est bénéfique. */
+const CHAMPS_SUIVIS = [
+  { cle: "moral", label: "Moral", bon: true },
+  { cle: "reput", label: "Réputation", bon: true },
+  { cle: "relationCoach", label: "Relation coach", bon: true },
+  { cle: "tempsJeu", label: "Temps de jeu", bon: true, suffixe: "%" },
+  { cle: "usure", label: "Usure", bon: false },
+  { cle: "suspension", label: "Suspension", bon: false, suffixe: " sem." },
+  { cle: "argent", label: "Argent", bon: true, suffixe: " k€" },
+];
+
+const STAT_LABELS = {
+  puissance: "Puissance", vitesse: "Vitesse", technique: "Technique",
+  vision: "Vision", mental: "Mental", endurance: "Endurance",
+};
+
+/** Photographie les valeurs suivies avant un choix, pour les comparer après. */
+export function snapshot(s) {
+  const snap = {};
+  for (const { cle } of CHAMPS_SUIVIS) snap[cle] = s[cle] || 0;
+  snap.stats = { ...s.stats };
+  return snap;
+}
+
+/**
+ * Compare un snapshot à l'état courant et retourne la liste des variations
+ * notables, pour les afficher au joueur (ex. « Moral −10 », « Vision +3 »).
+ */
+export function diffEtat(avant, apres) {
+  const out = [];
+  for (const { cle, label, bon, suffixe } of CHAMPS_SUIVIS) {
+    const d = Math.round((apres[cle] || 0) - (avant[cle] || 0));
+    if (d !== 0) out.push({ label, delta: d, bon, suffixe });
+  }
+  for (const k in apres.stats) {
+    const d = Math.round(apres.stats[k] - (avant.stats?.[k] ?? apres.stats[k]));
+    if (d !== 0) out.push({ label: STAT_LABELS[k] || k, delta: d, bon: true });
+  }
+  return out;
+}
+
 /** Borne toutes les jauges après une mutation externe (événement). */
 export function normaliser(s) {
   s.moral = clamp(s.moral, 0, 100);

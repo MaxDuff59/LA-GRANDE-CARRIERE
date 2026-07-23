@@ -2,38 +2,84 @@ import React from "react";
 import { C, S } from "../styles/theme.js";
 import { Bouton } from "./Bouton.jsx";
 
+/** Petites pastilles montrant l'impact chiffré du choix sur les jauges/stats. */
+function Effets({ effets }) {
+  if (!effets || !effets.length) return null;
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 }}>
+      {effets.map((e, i) => {
+        const positif = e.delta > 0 === e.bon;
+        return (
+          <span
+            key={i}
+            style={{
+              fontSize: 11.5,
+              fontWeight: 600,
+              padding: "4px 9px",
+              borderRadius: 6,
+              color: positif ? C.accent2 : C.rouge,
+              background: positif ? "rgba(15,123,108,0.13)" : "rgba(180,52,42,0.13)",
+            }}
+          >
+            {e.label} {e.delta > 0 ? "+" : ""}
+            {e.delta}
+            {e.suffixe || ""}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Habillage par type de carte : couleur de bordure et badge d'en-tête. */
+const KINDS = {
+  action: { teinte: C.accent, badge: "⚡ Action de match" },
+  hygiene: { teinte: C.nuit, badge: "🌙 Hygiène de vie" },
+};
+
 /**
  * Carte de décision, en deux temps : la situation et ses options, puis
- * l'issue tirée au sort. Les actions de match ont une teinte distincte
- * des événements narratifs — ce ne sont pas les mêmes enjeux.
+ * l'issue tirée au sort. Chaque type (action de match, hygiène de vie,
+ * événement narratif) a sa teinte — ce ne sont pas les mêmes enjeux.
  */
 export function CarteEvenement({ evenement, etat, resultat, onChoix, onContinuer }) {
-  const estAction = evenement.kind === "action";
-  const teinte = estAction ? C.accent : C.or;
+  const conf = KINDS[evenement.kind];
+  const teinte = conf ? conf.teinte : C.or;
 
   return (
-    <div style={{ ...S.card, borderColor: teinte, marginBottom: 0 }}>
-      {estAction && (
+    <div style={{ ...S.card, borderColor: teinte, marginBottom: 0, padding: 22 }}>
+      {conf && (
         <div
           style={{
             ...S.label,
             color: teinte,
             fontSize: 10.5,
-            marginBottom: 8,
+            marginBottom: 16,
             fontWeight: 700,
           }}
         >
-          ⚡ Action de match
+          {conf.badge}
         </div>
       )}
 
-      <div style={{ ...S.label, color: teinte, marginBottom: 6 }}>{evenement.titre}</div>
+      <div
+        style={{
+          fontSize: 18,
+          fontWeight: 800,
+          letterSpacing: "-0.01em",
+          lineHeight: 1.3,
+          color: teinte,
+          marginBottom: 16,
+        }}
+      >
+        {evenement.titre}
+      </div>
 
       <p
         style={{
-          fontSize: 14,
-          lineHeight: 1.6,
-          margin: "0 0 14px",
+          fontSize: 14.5,
+          lineHeight: 1.7,
+          margin: "0 0 24px",
           color: resultat ? C.txt2 : C.txt,
         }}
       >
@@ -45,16 +91,17 @@ export function CarteEvenement({ evenement, etat, resultat, onChoix, onContinuer
           <div
             style={{
               borderTop: `1px solid ${C.bord}`,
-              paddingTop: 13,
-              marginBottom: 13,
+              paddingTop: 18,
+              marginBottom: 20,
             }}
           >
-            <div style={{ fontSize: 12.5, color: C.or, marginBottom: 8, fontWeight: 600 }}>
+            <div style={{ fontSize: 12.5, color: C.or, marginBottom: 12, fontWeight: 600 }}>
               ▸ {resultat.label}
             </div>
-            <p style={{ fontSize: 15, lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+            <p style={{ fontSize: 15, lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
               {resultat.txt}
             </p>
+            <Effets effets={resultat.effets} />
           </div>
           <Bouton onClick={onContinuer}>Continuer</Bouton>
         </>
@@ -68,7 +115,8 @@ export function CarteEvenement({ evenement, etat, resultat, onChoix, onContinuer
               border: `1px solid ${C.bord}`,
               color: C.txt,
               textAlign: "left",
-              marginBottom: 7,
+              marginBottom: 10,
+              padding: "15px 18px",
               fontWeight: 600,
             }}
           >

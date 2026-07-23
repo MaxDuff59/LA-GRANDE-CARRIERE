@@ -266,5 +266,9 @@ export function simulerSaison(s) {
     essais,
   });
 
-  return { log, matchs, essais, points };
+  // Recalcule la note pour refléter les attributs érodés par une blessure.
+  s.note = noteGlobale(s.stats, s.poste);
+
+  const bilan = bilanSaison(s, matchs, essais, points, titreGagne);
+  return { log, matchs, essais, points, bilan };
 }

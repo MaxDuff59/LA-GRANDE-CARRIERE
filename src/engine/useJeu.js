@@ -4,8 +4,9 @@ import { NATIONS, ORIGINES, HYGIENES, AGENTS } from "../data/profil.js";
 import { CLUBS } from "../data/clubs.js";
 import { EVENTS } from "../data/events.js";
 import { ACTIONS } from "../data/actions.js";
+import { VIE } from "../data/vie.js";
 import { MAX_PERKS_EQUIPES, PERKS } from "../data/perks.js";
-import { creerCarriere, rehydrater, normaliser, noteGlobale } from "./joueur.js";
+import { creerCarriere, rehydrater, normaliser, noteGlobale, snapshot, diffEtat } from "./joueur.js";
 import { progression } from "./progression.js";
 import { simulerSaison } from "./saison.js";
 import { marche, signer as signerOffre, verifierFin } from "./marche.js";
@@ -113,6 +114,16 @@ export function useJeu() {
     return tirees;
   }, []);
 
+  /**
+   * Tire un événement « hygiène de vie », ou null. Répétable (aucun flag),
+   * environ une saison sur deux, filtré par le profil du joueur.
+   */
+  const tirerVie = useCallback((etat) => {
+    const dispo = VIE.filter((e) => !e.cond || e.cond(etat));
+    if (!dispo.length || !chance(0.48)) return null;
+    return pickPondere(dispo);
+  }, []);
+
   /** Joue une saison entière. */
   const jouerSaison = useCallback(() => {
     if (!s || s.fini || file.length || offres) return;
@@ -134,10 +145,15 @@ export function useJeu() {
 
     // Tirés avant le vieillissement : les `cond` d'âge et les conséquences
     // (usure, moral) doivent porter sur la saison qui vient d'être jouée.
+    // Ordre d'apparition : actions de match, hygiène de vie, puis narratif.
     const actions = tirerActions(etat);
+    const vie = tirerVie(etat);
     const ev = tirerEvenement(etat);
     if (ev) etat.flags[`ev_${ev.id}`] = true;
-    setFile([...actions, ...(ev ? [ev] : [])]);
+
+    // Le récap de fin de saison clôt toujours la file, juste avant les offres.
+    const recap = { kind: "recap", id: `recap-${etat.saison}`, bilan: res.bilan };
+    setFile([...actions, ...(vie ? [vie] : []), ...(ev ? [ev] : []), recap]);
 
     etat.age += 1;
     etat.saison += 1;
@@ -151,12 +167,13 @@ export function useJeu() {
 
     setS(etat);
     ajouterLignes(lignes);
-  }, [s, file, offres, tirerActions, tirerEvenement, ajouterLignes]);
+  }, [s, file, offres, tirerActions, tirerVie, tirerEvenement, ajouterLignes]);
 
   /** Applique le choix du joueur sur une action de match ou un événement. */
   const repondreEvenement = useCallback(
     (choix) => {
       const etat = rehydrater(s);
+      const avant = snapshot(etat);
 
       // Une action de match n'a pas d'effet écrit d'avance : on tire une
       // issue parmi celles du choix, pondérée par les attributs.
@@ -177,14 +194,20 @@ export function useJeu() {
       }
 
       normaliser(etat);
+      const effets = diffEtat(avant, etat);
       setS(etat);
-      const action = evenement?.kind === "action";
+      const typeConseq =
+        evenement?.kind === "action"
+          ? "action"
+          : evenement?.kind === "hygiene"
+          ? "hygiene"
+          : "conseq";
       ajouterLignes([
         { type: "choix", txt: `▸ ${choix.label}` },
-        { type: action ? "action" : "conseq", txt: consequence },
+        { type: typeConseq, txt: consequence },
       ]);
       // La carte reste ouverte : c'est `continuer` qui dépile.
-      setResultat({ label: choix.label, txt: consequence });
+      setResultat({ label: choix.label, txt: consequence, effets });
     },
     [s, evenement, ajouterLignes]
   );
