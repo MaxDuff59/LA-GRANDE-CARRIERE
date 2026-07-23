@@ -26,6 +26,19 @@ input:focus-visible,
   border-radius: 4px;
 }
 
+@keyframes voile {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes monte {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;

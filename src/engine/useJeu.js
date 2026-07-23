@@ -31,6 +31,13 @@ export function useJeu() {
   const [file, setFile] = useState([]);
   const evenement = file[0] ?? null;
 
+  /**
+   * Issue de la décision en cours, affichée dans le même modal avant de
+   * passer à la suivante. Sans cette étape, le résultat d'une action de
+   * match disparaîtrait derrière la carte suivante.
+   */
+  const [resultat, setResultat] = useState(null);
+
   // Méta-progression
   const [jetons, setJetons] = useState(6);
   const [debloques, setDebloques] = useState([]);
@@ -61,6 +68,7 @@ export function useJeu() {
       setS(etat);
       setDefiEnCours(defi);
       setFile([]);
+      setResultat(null);
       setOffres(null);
       setJournal([
         { type: "titre", txt: `Saison ${etat.saison} — ${etat.age} ans — ${etat.club.nom} (${etat.club.div})` },
@@ -175,10 +183,17 @@ export function useJeu() {
         { type: "choix", txt: `▸ ${choix.label}` },
         { type: action ? "action" : "conseq", txt: consequence },
       ]);
-      setFile((f) => f.slice(1));
+      // La carte reste ouverte : c'est `continuer` qui dépile.
+      setResultat({ label: choix.label, txt: consequence });
     },
     [s, evenement, ajouterLignes]
   );
+
+  /** Ferme l'issue affichée et passe à la décision suivante. */
+  const continuer = useCallback(() => {
+    setResultat(null);
+    setFile((f) => f.slice(1));
+  }, []);
 
   /** Signe une offre de contrat. */
   const signer = useCallback(
@@ -227,6 +242,7 @@ export function useJeu() {
     setS(etat);
     setOffres(null);
     setFile([]);
+    setResultat(null);
     ajouterLignes([{ type: "fin", txt: etat.finRaison }]);
   }, [s, ajouterLignes]);
 
@@ -254,7 +270,7 @@ export function useJeu() {
 
   return {
     // État
-    ecran, s, journal, evenement, offres, defiEnCours,
+    ecran, s, journal, evenement, resultat, offres, defiEnCours,
     jetons, debloques, equipes, histo, configDefi,
     perks: PERKS,
 
@@ -263,6 +279,7 @@ export function useJeu() {
     lancerCarriere,
     jouerSaison,
     repondreEvenement,
+    continuer,
     signer,
     terminerCarriere,
     prendreRetraite,

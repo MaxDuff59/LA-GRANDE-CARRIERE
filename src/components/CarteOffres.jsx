@@ -4,7 +4,7 @@ import { C, S, optionStyle } from "../styles/theme.js";
 /** Liste des offres de contrat en fin de bail. */
 export function CarteOffres({ offres, onSigner }) {
   return (
-    <div style={{ ...S.card, borderColor: C.accent2 }}>
+    <div style={{ ...S.card, borderColor: C.accent2, marginBottom: 0 }}>
       <div style={{ ...S.label, color: C.accent2, marginBottom: 10 }}>
         Fin de contrat — choisis ton club
       </div>

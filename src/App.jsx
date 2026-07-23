@@ -41,9 +41,11 @@ export default function App() {
           s={jeu.s}
           journal={jeu.journal}
           evenement={jeu.evenement}
+          resultat={jeu.resultat}
           offres={jeu.offres}
           onJouerSaison={jeu.jouerSaison}
           onChoixEvenement={jeu.repondreEvenement}
+          onContinuer={jeu.continuer}
           onSigner={jeu.signer}
           onTerminer={jeu.terminerCarriere}
           onRetraite={jeu.prendreRetraite}
