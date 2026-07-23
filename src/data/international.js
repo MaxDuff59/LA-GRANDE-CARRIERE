@@ -84,7 +84,7 @@ export const CIRCUITS = {
 
 /** Le tournoi principal de chaque nation jouable. */
 export const CIRCUIT_NATION = {
-  fr: "6n", ie: "6n", it: "6n",
+  fr: "6n", en: "6n", ie: "6n", it: "6n",
   nz: "rc", za: "rc", ar: "rc",
   fj: "pnc",
   ge: "rec",
@@ -102,7 +102,7 @@ export const TOURNEES = {
 
 /** Hémisphère de chaque nation jouable (sens des tournées). */
 export const HEMISPHERE = {
-  fr: "nord", ie: "nord", it: "nord", ge: "nord",
+  fr: "nord", en: "nord", ie: "nord", it: "nord", ge: "nord",
   nz: "sud", za: "sud", ar: "sud", fj: "sud",
 };
 

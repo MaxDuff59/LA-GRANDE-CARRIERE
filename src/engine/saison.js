@@ -64,6 +64,7 @@ function bilanSaison(s, matchs, essais, points, titreGagne) {
 
   return {
     saison: s.saison,
+    age: s.age,
     club: s.club.nom,
     div: s.club.div,
     matchs,
@@ -93,8 +94,14 @@ const BLESSURES = [
   { nom: "Fracture de la main", semaines: 7, usure: 3 },
 ];
 
-/** Temps de jeu en % selon l'écart de niveau avec le club. */
-function calculerTempsJeu(s) {
+/** Baisse maximale de temps de jeu tolérée la saison d'arrivée dans un club. */
+const BAISSE_MAX_TRANSFERT = 8;
+
+/**
+ * Temps de jeu en % selon l'écart de niveau avec le club.
+ * @param {boolean} blesse - le joueur sort d'une blessure (saison précédente).
+ */
+function calculerTempsJeu(s, { blesse = false } = {}) {
   const attendu = s.club.prestige * 0.72 + 18;
   const ecart = s.note - attendu;
   let cible = 45 + ecart * 3.4 + (s.relationCoach - 50) * 0.4;
@@ -109,7 +116,19 @@ function calculerTempsJeu(s) {
   // s'installe sans attendre des années.
   const actuel = s.tempsJeu ?? cible;
   const vitesse = cible > actuel ? 0.55 : 0.35;
-  const tj = actuel + (cible - actuel) * vitesse + rint(-4, 4);
+  let tj = actuel + (cible - actuel) * vitesse + rint(-4, 4);
+
+  // Avant 30 ans, une carrière se construit : hors blessure ou carton, le
+  // temps de jeu ne redescend pas. Seule exception, la saison d'arrivée dans
+  // un nouveau club (ancienneteClub remis à 0 par la signature) — s'y battre
+  // pour sa place peut coûter quelques points, mais jamais plus que ~8 %.
+  const carton = s.suspension > 0;
+  if (s.age < 30 && !blesse && !carton) {
+    const vientDArriver = s.ancienneteClub === 0;
+    const plancher = vientDArriver ? actuel - BAISSE_MAX_TRANSFERT : actuel;
+    tj = Math.max(tj, plancher);
+  }
+
   return Math.round(clamp(tj, 4, 96));
 }
 
@@ -161,13 +180,14 @@ export function simulerSaison(s) {
   const log = [];
 
   // Purge de la blessure de la saison précédente
+  const blesseLaSaisonPassee = Boolean(s.blessure);
   if (s.blessure) {
     log.push(`🩹 ${s.blessure.nom} : ${s.blessure.semaines} semaines d'absence.`);
     s.blessure = null;
   }
 
   // Temps de jeu et volume de matchs
-  s.tempsJeu = calculerTempsJeu(s);
+  s.tempsJeu = calculerTempsJeu(s, { blesse: blesseLaSaisonPassee });
   if (s.suspension > 0) {
     log.push(`🟥 ${s.suspension} semaines de suspension purgées.`);
     s.suspension = 0;

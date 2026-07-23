@@ -130,19 +130,23 @@ export function useJeu() {
     if (!s || s.fini || file.length || offres) return;
 
     const etat = rehydrater(s);
-    const lignes = [
-      { type: "titre", txt: `━━ Saison ${etat.saison} — ${etat.age} ans — ${etat.club.nom} ━━` },
-    ];
 
     progression(etat);
     etat.note = noteGlobale(etat.stats, etat.poste);
 
     const res = simulerSaison(etat);
-    lignes.push({
-      type: "stat",
-      txt: `${res.matchs} matchs · ${res.essais} essais · ${res.points} pts · note ${etat.note}`,
-    });
-    res.log.forEach((txt) => lignes.push({ type: "event", txt }));
+
+    // Le résultat chiffré et le narratif de saison ne sont PAS écrits au
+    // journal tout de suite : ce serait dévoiler l'issue avant que le joueur
+    // ne réponde aux actions de match qui suivent. On les diffère jusqu'à la
+    // carte de bilan, qui clôt la saison — voir `continuer`.
+    const bilanLignes = [
+      {
+        type: "stat",
+        txt: `${res.matchs} matchs · ${res.essais} essais · ${res.points} pts · note ${etat.note}`,
+      },
+      ...res.log.map((txt) => ({ type: "event", txt })),
+    ];
 
     // Tirés avant le vieillissement : les `cond` d'âge et les conséquences
     // (usure, moral) doivent porter sur la saison qui vient d'être jouée.
@@ -155,21 +159,33 @@ export function useJeu() {
     // Saison internationale (action décisive éventuelle + récap du parcours),
     // insérée avant le récap de club qui clôt toujours la file.
     const intl = res.campagne ? construireCartesInternationales(res.campagne) : [];
-    const recap = { kind: "recap", id: `recap-${etat.saison}`, bilan: res.bilan };
-    setFile([...actions, ...(vie ? [vie] : []), ...(ev ? [ev] : []), ...intl, recap]);
 
     etat.age += 1;
     etat.saison += 1;
 
     if (verifierFin(etat)) {
-      lignes.push({ type: "fin", txt: etat.finRaison });
+      bilanLignes.push({ type: "fin", txt: etat.finRaison });
     } else {
       const nouvellesOffres = marche(etat);
       if (nouvellesOffres) setOffres(nouvellesOffres);
     }
 
+    // La carte de bilan porte les lignes différées : elles rejoignent le
+    // journal seulement quand le joueur la valide (`continuer`).
+    const recap = {
+      kind: "recap",
+      id: `recap-${res.bilan.saison}`,
+      bilan: res.bilan,
+      journal: bilanLignes,
+    };
+    setFile([...actions, ...(vie ? [vie] : []), ...(ev ? [ev] : []), ...intl, recap]);
+
     setS(etat);
-    ajouterLignes(lignes);
+    // Seul l'en-tête de saison s'affiche d'emblée : il situe les actions à
+    // venir sans rien dévoiler du résultat.
+    ajouterLignes([
+      { type: "titre", txt: `━━ Saison ${res.bilan.saison} — ${res.bilan.age} ans — ${res.bilan.club} ━━` },
+    ]);
   }, [s, file, offres, tirerActions, tirerVie, tirerEvenement, ajouterLignes]);
 
   /** Applique le choix du joueur sur une action de match ou un événement. */
@@ -220,8 +236,14 @@ export function useJeu() {
   /** Ferme l'issue affichée et passe à la décision suivante. */
   const continuer = useCallback(() => {
     setResultat(null);
-    setFile((f) => f.slice(1));
-  }, []);
+    setFile((f) => {
+      const [tete, ...reste] = f;
+      // La carte de bilan porte le résultat différé de la saison : il rejoint
+      // le journal maintenant, une fois les actions de match résolues.
+      if (tete?.journal) ajouterLignes(tete.journal);
+      return reste;
+    });
+  }, [ajouterLignes]);
 
   /** Signe une offre de contrat. */
   const signer = useCallback(
