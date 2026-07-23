@@ -33,8 +33,12 @@ const LISTE = [
           s.usure += 6;
           const r = Math.random();
           if (r < 0.14) {
-            s.blessure = { nom: "Entorse bête sur la piste de danse", semaines: 3 };
+            s.blessure = {
+              nom: "Entorse bête sur la piste de danse",
+              semaines: 3,
+            };
             s.usure += 6;
+            s.relationCoach -= 6;
             return "Chute idiote à 3h du matin. Entorse. Le staff ne rigole pas du tout.";
           }
           if (r < 0.4) {
@@ -50,6 +54,11 @@ const LISTE = [
           s.usure -= 3;
           s.moral -= 3;
           s.relationCoach += 2;
+          const r = Math.random();
+          if (r < 0.33) {
+            s.reput -= 2;
+            return `Vos coéquipiers vous surnomment désormais Papi ${s.nom}.`;
+          }
           return "Un verre, une photo, au lit. Le corps te remerciera dimanche.";
         },
       },
@@ -229,6 +238,83 @@ const LISTE = [
           s.moral += 3;
           s.usure += 4;
           return "Rien ne change. Tu contrôles. Enfin, c'est ce que tu te dis.";
+        },
+      },
+    ],
+  },
+
+  {
+    id: "le_burrito",
+    poids: 8,
+    cond: (s) => s.age >= 19,
+    titre: "Le burrito de la discorde",
+    texte: () =>
+      `Deux coéquipiers, un talonneur et un arrière, se prennent la tête à cause du dernier burrito restant. Une bagarre éclate entre eux.`,
+    choix: [
+      {
+        label: "S'interposer pour les séparer",
+        effet: (s) => {
+          const r = Math.random();
+          if (r < 0.3) {
+            s.usure -= 8;
+            s.moral -= 6;
+            return "Un coup de poing du talonneur arrive en plein milieu de ton visage. Tu finis la soirée à l'hôpital.";
+          }
+          s.usure -= 3;
+          s.moral += 3;
+          return "La situation se calme et tes coéquipiers te remercient d'être intervenus.";
+        },
+      },
+      {
+        label: "Les regarder se battre",
+        effet: (s) => {
+          const r = Math.random();
+          if (r < 0.3) {
+            s.usure -= 4;
+            s.moral -= 5;
+            return "Votre arrière, meilleur marqueur d'essai de l'équipe, finit à l'hôpital. Vos coéquipiers vous reprochent de ne pas être intervenus.";
+          }
+          s.usure -= 3;
+          s.moral -= 6;
+          return "D'autres coéquipiers s'interposent et chacun repart de son côté. Vos coéquipiers vous reprochent de ne pas être intervenus.";
+        },
+      },
+    ],
+  },
+
+  {
+    id: "la_supportrice_un_peu_trop_collante",
+    poids: 8,
+    cond: (s) => s.age >= 19,
+    titre: "La supportrice un peu trop collante",
+    texte: () =>
+      `À la suite du dernier match, vous sortez en boîte de nuit avec plusieurs coéquipiers. Une jeune femme vous drague pendant une bonne partie de la soirée et souhaite rentrer avec vous à l'hôtel.`,
+    choix: [
+      {
+        label: "Accepter avec un grand sourire",
+        effet: (s) => {
+          const r = Math.random();
+          if (r < 0.3) {
+            s.usure += 8;
+            s.moral -= 6;
+            return "Malgré la soirée, elle décide de tout raconter à votre femme qui vous pensez à une soirée bowling entre coéquipiers.";
+          }
+          s.usure += 1;
+          s.moral += 6;
+          return "Le coup de foudre. Vous emmenagez ensemble quelques semaines après.";
+        },
+      },
+      {
+        label: "Refuser catégoriquement",
+        effet: (s) => {
+          const r = Math.random();
+          if (r < 0.3) {
+            s.usure += 5;
+            s.moral -= 5;
+            return "Vous rentrez seul dans votre appartement de 15m2. Impossible de dormir vous ne faîtes que penser à cette femme.";
+          }
+          s.moral += 6;
+          return "Vous rentrez dormir auprès de votre femme et décidez de lui préparer un petit-déjeuner au réveil.";
         },
       },
     ],

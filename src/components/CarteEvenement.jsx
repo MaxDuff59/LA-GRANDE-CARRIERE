@@ -35,6 +35,7 @@ function Effets({ effets }) {
 const KINDS = {
   action: { teinte: C.accent, badge: "⚡ Action de match" },
   hygiene: { teinte: C.nuit, badge: "🌙 Hygiène de vie" },
+  intlFinal: { teinte: C.azur, badge: "🏆 Titre en jeu" },
 };
 
 /**

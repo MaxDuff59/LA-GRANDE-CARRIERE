@@ -1,5 +1,7 @@
 import { COMPETS, MATCHS_PAR_DIV } from "../data/clubs.js";
+import { CIRCUIT_NATION, CIRCUITS } from "../data/international.js";
 import { noteGlobale } from "./joueur.js";
+import { simulerCampagne, estSelectionne } from "./international.js";
 import { rnd, rint, clamp, pick, chance } from "./utils.js";
 
 /** Taille approximative des championnats, pour situer le classement. */
@@ -123,37 +125,6 @@ function resultatCollectif(s, log) {
   return false;
 }
 
-/** Sélection nationale et trophées internationaux. */
-function selectionNationale(s, log) {
-  const seuil =
-    74 * s.nation.selecDiff +
-    (s.selecMalus || 0) -
-    (s.perks.includes("chouchou") ? 9 : 0);
-
-  if (!s.selecEligible || s.note < seuil || s.tempsJeu <= 45) return;
-
-  const caps = rint(3, 11);
-  s.internationalCaps += caps;
-  s.reput += 7;
-  log.push(`${s.nation.flag} ${caps} sélections avec ${s.nation.nom} (total : ${s.internationalCaps}).`);
-
-  if (s.internationalCaps >= 50 && !s.flags.cap50) {
-    s.flags.cap50 = true;
-    s.carriere.distinctions.push(`50ᵉ sélection (${s.saison})`);
-  }
-
-  if (chance(0.12) && s.note > 84) {
-    s.carriere.titres.push({ nom: "Tournoi des Six Nations", annee: s.saison, club: s.nation.nom });
-    log.push(`🏆 Tournoi remporté avec ${s.nation.nom} !`);
-  }
-
-  // Coupe du Monde tous les 4 ans
-  if (s.saison % 4 === 2 && chance(0.14) && s.note > 86) {
-    s.carriere.titres.push({ nom: "Coupe du Monde", annee: s.saison, club: s.nation.nom });
-    log.push(`🌍🏆 CHAMPION DU MONDE avec ${s.nation.nom} !`);
-  }
-}
-
 /** Distinctions individuelles. */
 function distinctions(s, essais, log) {
   if (s.note >= 88 && s.tempsJeu > 60 && chance(0.3)) {
@@ -192,8 +163,16 @@ export function simulerSaison(s) {
     s.suspension = 0;
   }
 
+  // Un international manque une partie de la saison de club pendant son
+  // tournoi — surtout un sudiste, dont le Rugby Championship tombe en
+  // pleine saison de club au nord.
   const matchsMax = MATCHS_PAR_DIV[s.club.div] || 26;
-  const matchs = Math.round(matchsMax * (s.tempsJeu / 100));
+  let facteurClub = 1;
+  if (estSelectionne(s)) {
+    const key = CIRCUIT_NATION[s.nationId];
+    if (key) facteurClub = 1 - CIRCUITS[key].absenceClub * 0.6;
+  }
+  const matchs = Math.round(matchsMax * (s.tempsJeu / 100) * facteurClub);
   s.carriere.matchs += matchs;
 
   // Essais
@@ -240,7 +219,7 @@ export function simulerSaison(s) {
   }
 
   const titreGagne = resultatCollectif(s, log);
-  selectionNationale(s, log);
+  const campagne = simulerCampagne(s, log);
   distinctions(s, essais, log);
 
   // Revenus de la saison (en k€)
@@ -270,5 +249,5 @@ export function simulerSaison(s) {
   s.note = noteGlobale(s.stats, s.poste);
 
   const bilan = bilanSaison(s, matchs, essais, points, titreGagne);
-  return { log, matchs, essais, points, bilan };
+  return { log, matchs, essais, points, bilan, campagne };
 }

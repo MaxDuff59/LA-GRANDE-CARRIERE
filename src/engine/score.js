@@ -8,6 +8,9 @@ const VALEUR_TITRES = {
   "Champions Cup": 700,
   "Bouclier de Brennus": 650,
   "Tournoi des Six Nations": 450,
+  "The Rugby Championship": 450,
+  "Pacific Nations Cup": 240,
+  "Rugby Europe Championship": 220,
   "URC": 400,
   "Premiership": 400,
   "Super Rugby": 400,
@@ -70,12 +73,12 @@ export function calculerScore(s) {
  * barème au-dessus, relance le test et recale ces seuils.
  */
 const RANGS = [
-  { min: 7800, titre: "LÉGENDE ABSOLUE", couleur: "#E8C547" },
-  { min: 5900, titre: "ICÔNE", couleur: "#E8C547" },
-  { min: 4900, titre: "GRAND JOUEUR", couleur: "#7FB069" },
-  { min: 3900, titre: "INTERNATIONAL SOLIDE", couleur: "#7FB069" },
-  { min: 2800, titre: "BON PROFESSIONNEL", couleur: "#9BA7B4" },
-  { min: 1300, titre: "CARRIÈRE HONNÊTE", couleur: "#9BA7B4" },
+  { min: 7000, titre: "LÉGENDE ABSOLUE", couleur: "#E8C547" },
+  { min: 4950, titre: "ICÔNE", couleur: "#E8C547" },
+  { min: 3950, titre: "GRAND JOUEUR", couleur: "#7FB069" },
+  { min: 2950, titre: "INTERNATIONAL SOLIDE", couleur: "#7FB069" },
+  { min: 1300, titre: "BON PROFESSIONNEL", couleur: "#9BA7B4" },
+  { min: 800, titre: "CARRIÈRE HONNÊTE", couleur: "#9BA7B4" },
   { min: 0, titre: "PASSAGE ÉCLAIR", couleur: "#8A7F76" },
 ];
 
@@ -85,5 +88,5 @@ export function rang(score) {
 
 /** Jetons gagnés en fin de carrière (hors Défi du jour). */
 export function jetonsGagnes(score) {
-  return Math.floor(score / 650) + 1;
+  return Math.floor(score / 520) + 1;
 }

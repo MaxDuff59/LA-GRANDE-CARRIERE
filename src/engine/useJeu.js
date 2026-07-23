@@ -9,6 +9,7 @@ import { MAX_PERKS_EQUIPES, PERKS } from "../data/perks.js";
 import { creerCarriere, rehydrater, normaliser, noteGlobale, snapshot, diffEtat } from "./joueur.js";
 import { progression } from "./progression.js";
 import { simulerSaison } from "./saison.js";
+import { construireCartesInternationales } from "./international.js";
 import { marche, signer as signerOffre, verifierFin } from "./marche.js";
 import { calculerScore, rang, jetonsGagnes } from "./score.js";
 import { pickPondere, pickPondereDyn, seedRandom, seedDuJour, chance } from "./utils.js";
@@ -151,9 +152,11 @@ export function useJeu() {
     const ev = tirerEvenement(etat);
     if (ev) etat.flags[`ev_${ev.id}`] = true;
 
-    // Le récap de fin de saison clôt toujours la file, juste avant les offres.
+    // Saison internationale (action décisive éventuelle + récap du parcours),
+    // insérée avant le récap de club qui clôt toujours la file.
+    const intl = res.campagne ? construireCartesInternationales(res.campagne) : [];
     const recap = { kind: "recap", id: `recap-${etat.saison}`, bilan: res.bilan };
-    setFile([...actions, ...(vie ? [vie] : []), ...(ev ? [ev] : []), recap]);
+    setFile([...actions, ...(vie ? [vie] : []), ...(ev ? [ev] : []), ...intl, recap]);
 
     etat.age += 1;
     etat.saison += 1;
@@ -201,6 +204,8 @@ export function useJeu() {
           ? "action"
           : evenement?.kind === "hygiene"
           ? "hygiene"
+          : evenement?.kind === "intlFinal"
+          ? "intl"
           : "conseq";
       ajouterLignes([
         { type: "choix", txt: `▸ ${choix.label}` },

@@ -13,6 +13,7 @@ export const C = {
   rouge: "#B4342A",
   ambre: "#D4A03C",
   nuit: "#8B7BC4", // événements « hygiène de vie » (hors du terrain)
+  azur: "#4C87C9", // sélection nationale / compétitions internationales
 };
 
 export const S = {

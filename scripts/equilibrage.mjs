@@ -32,6 +32,7 @@ import { VIE } from "../src/data/vie.js";
 import { creerCarriere, rehydrater, normaliser, noteGlobale } from "../src/engine/joueur.js";
 import { progression } from "../src/engine/progression.js";
 import { simulerSaison } from "../src/engine/saison.js";
+import { resoudreDeciderAuto } from "../src/engine/international.js";
 import { marche, verifierFin, signer } from "../src/engine/marche.js";
 import { calculerScore, rang } from "../src/engine/score.js";
 import { pickPondere, pickPondereDyn, pick, chance } from "../src/engine/utils.js";
@@ -48,7 +49,8 @@ function simulerCarriere(setup, perks = []) {
     s = rehydrater(s);
     progression(s);
     s.note = noteGlobale(s.stats, s.poste);
-    simulerSaison(s);
+    const res = simulerSaison(s);
+    resoudreDeciderAuto(s, res.campagne); // match à enjeu tranché au hasard
 
     // Actions de match : 1 à 2 par saison, choix et issue au hasard.
     if (!process.env.SANS_ACTIONS && s.tempsJeu >= 25) {

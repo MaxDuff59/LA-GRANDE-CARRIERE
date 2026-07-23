@@ -5,6 +5,7 @@ import { Jauge, LigneAttribut } from "../components/Jauge.jsx";
 import { Journal } from "../components/Journal.jsx";
 import { CarteEvenement } from "../components/CarteEvenement.jsx";
 import { CarteBilan } from "../components/CarteBilan.jsx";
+import { CarteTournoi } from "../components/CarteTournoi.jsx";
 import { CarteOffres } from "../components/CarteOffres.jsx";
 
 export function Jeu({
@@ -91,6 +92,8 @@ export function Jeu({
           >
             {evenement.kind === "recap" ? (
               <CarteBilan bilan={evenement.bilan} onContinuer={onContinuer} />
+            ) : evenement.kind === "intl" ? (
+              <CarteTournoi campagne={evenement.campagne} onContinuer={onContinuer} />
             ) : (
               <CarteEvenement
                 evenement={evenement}
